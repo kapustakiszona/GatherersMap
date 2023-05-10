@@ -3,28 +3,51 @@ package com.example.gatherersmap.presentation.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.gatherersmap.data.ItemSpotDatabase
+import com.example.gatherersmap.data.ItemSpotRepositoryImpl
+import com.example.gatherersmap.presentation.MapEvent
+import com.example.gatherersmap.presentation.vm.MapViewModel
+import com.example.gatherersmap.presentation.vm.MapViewModelFactory
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapType
-import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
 fun MapScreen() {
-    var uiSettings by remember { mutableStateOf(MapUiSettings()) }
-    var properties by remember {
-        mutableStateOf(MapProperties(mapType = MapType.HYBRID))
-    }
+    val viewModel: MapViewModel =
+        viewModel(factory = MapViewModelFactory(repositoryImpl = ItemSpotRepositoryImpl(database = ItemSpotDatabase.Companion)))
+    val cameraPositionState = rememberCameraPositionState()
 
     Box(Modifier.fillMaxSize()) {
         GoogleMap(
             modifier = Modifier.matchParentSize(),
-            properties = properties,
-            uiSettings = uiSettings
-        )
+            cameraPositionState = cameraPositionState,
+            onMapLongClick = {
+                viewModel.onEvent(MapEvent.OnAddItemButtonClick(it))
+            }
+        ) {
+            viewModel.state.itemSpots.forEach { itemSpot ->
+                Marker(
+                    state = MarkerState(
+                        position = LatLng(
+                            itemSpot.lat, itemSpot.lng
+                        )
+                    ),
+                    title = "item spot ${itemSpot.lat}, ${itemSpot.lng}",
+                    onInfoWindowClick = {
+                        viewModel.onEvent(MapEvent.OnDeleteItemClick(itemSpot))
+                    },
+                    onClick = {
+                        it.showInfoWindow()
+                        true
+                    }
+                )
+
+            }
+        }
     }
 }
