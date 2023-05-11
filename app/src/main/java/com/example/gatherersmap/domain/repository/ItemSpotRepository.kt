@@ -8,5 +8,6 @@ interface ItemSpotRepository {
 
     suspend fun deleteItemSpot(spot: ItemSpot)
 
+    suspend fun updateItemSpotDetails(spot: ItemSpot)
     fun getItemSpots(): Flow<List<ItemSpot>>
 }

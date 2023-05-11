@@ -18,6 +18,10 @@ class ItemSpotRepositoryImpl(
         dao.deleteItemSpot(spot = spot.toItemSpotEntity())
     }
 
+    override suspend fun updateItemSpotDetails(spot: ItemSpot) {
+        dao.updateItemSpotDetails(spot = spot.toItemSpotEntity())
+    }
+
     override fun getItemSpots(): Flow<List<ItemSpot>> {
         return dao.getItemSpots().map { itemSpots ->
             itemSpots.map { item ->

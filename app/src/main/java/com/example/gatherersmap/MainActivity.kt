@@ -7,7 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.gatherersmap.data.ItemSpotDatabase
+import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.presentation.ui.BottomSheet
+import com.example.gatherersmap.presentation.vm.MapViewModel
+import com.example.gatherersmap.presentation.vm.MapViewModelFactory
 import com.example.gatherersmap.ui.theme.GatherersMapTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,7 +27,15 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    BottomSheet()
+                    val viewModel: MapViewModel =
+                        viewModel(
+                            factory = MapViewModelFactory(
+                                ItemSpotRepositoryImpl(
+                                    ItemSpotDatabase
+                                )
+                            )
+                        )
+                    BottomSheet(viewModel = viewModel)
                 }
             }
         }

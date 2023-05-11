@@ -27,7 +27,7 @@ fun MapScreen() {
             modifier = Modifier.matchParentSize(),
             cameraPositionState = cameraPositionState,
             onMapLongClick = {
-                viewModel.onEvent(MapEvent.OnAddItemButtonClick(it))
+                viewModel.onEvent(MapEvent.OnAddItemClick(it))
             }
         ) {
             viewModel.state.itemSpots.forEach { itemSpot ->
@@ -37,11 +37,12 @@ fun MapScreen() {
                             itemSpot.lat, itemSpot.lng
                         )
                     ),
-                    title = "item spot ${itemSpot.lat}, ${itemSpot.lng}",
+                    title = "item spot ${itemSpot.id}, ${itemSpot.name}",
                     onInfoWindowClick = {
                         viewModel.onEvent(MapEvent.OnDeleteItemClick(itemSpot))
                     },
                     onClick = {
+                        viewModel.onEvent(MapEvent.OnSheetDetailsClick(itemSpot))
                         it.showInfoWindow()
                         true
                     }
