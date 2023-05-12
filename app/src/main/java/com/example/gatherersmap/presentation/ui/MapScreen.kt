@@ -17,7 +17,7 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-fun MapScreen() {
+fun MapScreen(onMapClickListener: () -> Unit) {
     val viewModel: MapViewModel =
         viewModel(factory = MapViewModelFactory(repositoryImpl = ItemSpotRepositoryImpl(database = ItemSpotDatabase.Companion)))
     val cameraPositionState = rememberCameraPositionState()
@@ -28,6 +28,9 @@ fun MapScreen() {
             cameraPositionState = cameraPositionState,
             onMapLongClick = {
                 viewModel.onEvent(MapEvent.OnAddItemClick(it))
+            },
+            onMapClick = {
+                onMapClickListener()
             }
         ) {
             viewModel.state.itemSpots.forEach { itemSpot ->
@@ -47,7 +50,6 @@ fun MapScreen() {
                         true
                     }
                 )
-
             }
         }
     }

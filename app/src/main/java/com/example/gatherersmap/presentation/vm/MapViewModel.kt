@@ -53,11 +53,17 @@ class MapViewModel(
             }
 
             is MapEvent.OnSheetDetailsClick -> {
-                _sheetState.value = BottomSheetScreenState.Details(itemSpot = event.spot)
+                _sheetState.value =
+                    BottomSheetScreenState.Details(
+                        itemSpot = event.spot
+                    )
             }
 
             is MapEvent.OnSheetEditClick -> {
-                _sheetState.value = BottomSheetScreenState.Edit(itemSpot = event.spot)
+                _sheetState.value =
+                    BottomSheetScreenState.Edit(
+                        itemSpot = event.spot,
+                    )
             }
         }
     }
