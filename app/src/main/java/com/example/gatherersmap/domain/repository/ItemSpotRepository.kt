@@ -10,4 +10,5 @@ interface ItemSpotRepository {
 
     suspend fun updateItemSpotDetails(spot: ItemSpot)
     fun getItemSpots(): Flow<List<ItemSpot>>
+    suspend fun updateItemSpot(lat: Double, lng: Double, description: String, name: String)
 }

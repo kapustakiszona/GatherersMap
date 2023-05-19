@@ -10,9 +10,10 @@ import com.example.gatherersmap.domain.model.ItemSpot
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-sealed class BottomSheetScreenState() {
+sealed class BottomSheetScreenState {
 
-    object Start : BottomSheetScreenState()
+    object Initial : BottomSheetScreenState()
+    data class Add(val itemSpot: ItemSpot) : BottomSheetScreenState()
 
     data class Edit(val itemSpot: ItemSpot) : BottomSheetScreenState()
 
@@ -24,7 +25,7 @@ sealed class BottomSheetScreenState() {
         }
     }
 
-    fun hideSheet(scaffoldState: BottomSheetScaffoldState, scope: CoroutineScope){
+    fun hideSheet(scaffoldState: BottomSheetScaffoldState, scope: CoroutineScope) {
         scope.launch {
             scaffoldState.bottomSheetState.collapse()
         }

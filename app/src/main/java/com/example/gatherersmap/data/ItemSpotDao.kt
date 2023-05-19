@@ -22,4 +22,9 @@ interface ItemSpotDao {
 
     @Update
     suspend fun updateItemSpotDetails(spot: ItemSpotEntity)
+
+    @Query(
+        "UPDATE itemSpotEntity SET name = :name, description = :description WHERE lng = :lng AND lat = :lat"
+    )
+    suspend fun updateItemSpot(lat: Double, lng: Double, description: String, name: String)
 }

@@ -8,7 +8,7 @@ import com.example.gatherersmap.R
 data class ItemSpotEntity(
     val lat: Double,
     val lng: Double,
-    @PrimaryKey val id: Int? = null,
+    @PrimaryKey(autoGenerate = true) val id: Int,
     var name: String? = null,
     var description: String? = null,
     var image: Int = R.drawable.detail_image
