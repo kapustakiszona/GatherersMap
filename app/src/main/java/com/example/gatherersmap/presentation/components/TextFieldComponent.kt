@@ -7,6 +7,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -17,9 +18,9 @@ import com.example.gatherersmap.domain.model.ItemSpot
 fun TextFieldComponent(
     newValue: MutableState<String>,
     modifiedItem: ItemSpot,
+    focusManager: FocusManager,
     label: String
-){
-    val focusManager = LocalFocusManager.current
+){ val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = newValue.value,
         onValueChange = { text ->
