@@ -6,7 +6,9 @@ fun ItemSpotEntity.toItemSpot(): ItemSpot {
     return ItemSpot(
         lat = lat,
         lng = lng,
-        id = id
+        id = id,
+        name = name ?: "",
+        description = description ?: ""
     )
 }
 
@@ -14,6 +16,8 @@ fun ItemSpot.toItemSpotEntity(): ItemSpotEntity {
     return ItemSpotEntity(
         lat = lat,
         lng = lng,
-        id = id
+        id = id,
+        name = name,
+        description = description
     )
 }

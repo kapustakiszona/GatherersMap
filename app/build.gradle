@@ -64,7 +64,7 @@ dependencies {
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
-    implementation 'androidx.compose.material3:material3:1.1.0-rc01'
+    implementation 'androidx.compose.material3:material3:1.2.0-alpha01'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
@@ -73,7 +73,7 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     //maps
-    implementation 'com.google.maps.android:maps-compose:2.11.1'
+    implementation 'com.google.maps.android:maps-compose:2.11.2'
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
     implementation 'com.google.android.libraries.places:places:3.1.0'
     implementation 'com.google.android.gms:play-services-location:21.0.1'
@@ -82,13 +82,16 @@ dependencies {
     // KTX for the Maps SDK for Android
     implementation 'com.google.maps.android:maps-ktx:3.3.0'
     // KTX for the Maps SDK for Android Utility Library
-    implementation 'com.google.maps.android:maps-utils-ktx:3.2.1'
+    implementation 'com.google.maps.android:maps-utils-ktx:3.3.0'
     //lifecycle
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1"
+    implementation "androidx.compose.runtime:runtime-livedata:1.4.3"
     // Room
     implementation "androidx.room:room-runtime:2.5.1"
     kapt "androidx.room:room-compiler:2.5.1"
     // Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:2.5.1"
+    //rebugger
+    implementation 'com.github.theapache64:rebugger:1.0.0-alpha05'
+
 }
