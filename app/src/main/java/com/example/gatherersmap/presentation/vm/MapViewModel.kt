@@ -7,6 +7,7 @@ import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.navigation.BottomSheetScreenState
 import com.example.gatherersmap.presentation.MapEvent
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,8 +24,10 @@ class MapViewModel(
     private val _itemsState = MutableStateFlow(MapState())
     val itemsState = _itemsState.asStateFlow()
 
+    private val _temporalMarker = MutableStateFlow<LatLng?>(null)
+    val temporalMarker = _temporalMarker.asStateFlow()
+
     init {
-        Log.d("OTAG", "Init Started")
         viewModelScope.launch {
             repository.getItemSpots().collect {
                 _itemsState.value = _itemsState.value.copy(itemSpots = it)
@@ -36,6 +39,7 @@ class MapViewModel(
         when (event) {
 
             is MapEvent.Initial -> {
+                removeTemporalMarker()
                 setDefaultSheetState()
             }
 
@@ -49,8 +53,12 @@ class MapViewModel(
             }
 
             is MapEvent.OnAddItemLongClick -> {
+                _temporalMarker.value = event.latLng
                 _sheetState.value = BottomSheetScreenState.Add(
-                    itemSpot = event.spot
+                    itemSpot = ItemSpot(
+                        lng = event.latLng.longitude,
+                        lat = event.latLng.latitude
+                    )
                 )
             }
 
@@ -97,5 +105,10 @@ class MapViewModel(
             delay(80)
             _sheetState.value = BottomSheetScreenState.Initial
         }
+    }
+
+    fun removeTemporalMarker() {
+        Log.d("OTAG", "removing temporal marker")
+        _temporalMarker.value = null
     }
 }

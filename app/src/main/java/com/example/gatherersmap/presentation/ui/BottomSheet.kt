@@ -39,6 +39,7 @@ fun BottomSheet() {
     val itemsState = viewModel.itemsState.collectAsState()
     val sheetScreenState =
         viewModel.sheetState.collectAsState(BottomSheetScreenState.Initial)
+    val tempSpotState = viewModel.temporalMarker.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
     BottomSheetScaffold(
@@ -67,42 +68,57 @@ fun BottomSheet() {
         floatingActionButtonPosition = FabPosition.End,
         sheetContent = {
 
-            when (val currentState = sheetScreenState.value) {
+            when (val currentSheetState = sheetScreenState.value) {
 
                 is BottomSheetScreenState.Add -> {
-                    currentState.showSheet(scope = coroutineScope, scaffoldState = scaffoldState)
+                    currentSheetState.showSheet(
+                        scope = coroutineScope,
+                        scaffoldState = scaffoldState
+                    )
                     EditDetailsSheetContent(
-                        itemSpot = currentState.itemSpot,
+                        itemSpot = currentSheetState.itemSpot,
                         onSaveClicked = { itemSpot ->
                             if (itemSpot.id == 0) {
                                 viewModel.insertItemSpot(itemSpot)
                             } else {
                                 viewModel.updateItemSpot(itemSpot)
                             }
+                            currentSheetState.hideSheet(
+                                scope = coroutineScope,
+                                scaffoldState = scaffoldState
+                            )
+                            viewModel.onEvent(MapEvent.Initial)
                         }
                     )
                 }
 
                 is BottomSheetScreenState.Details -> {
-                    currentState.showSheet(
+                    currentSheetState.showSheet(
                         scope = coroutineScope,
                         scaffoldState = scaffoldState
                     )
                     DetailsSheetContent(
-                        itemSpot = currentState.itemSpot,
+                        itemSpot = currentSheetState.itemSpot,
                         onEditClickListener = {
                             viewModel.onEvent(MapEvent.OnEditItemClick(it))
+                        },
+                        onDeleteClickListener = {
+                            viewModel.onEvent(MapEvent.OnDeleteItemClick(it))
+                            currentSheetState.hideSheet(
+                                scope = coroutineScope,
+                                scaffoldState = scaffoldState
+                            )
                         }
                     )
                 }
 
                 is BottomSheetScreenState.Edit -> {
-                    currentState.showSheet(
+                    currentSheetState.showSheet(
                         scope = coroutineScope,
                         scaffoldState = scaffoldState
                     )
                     EditDetailsSheetContent(
-                        itemSpot = currentState.itemSpot,
+                        itemSpot = currentSheetState.itemSpot,
                         onSaveClicked = { itemSpot ->
                             if (itemSpot.id == 0) {
                                 viewModel.insertItemSpot(itemSpot)
@@ -121,6 +137,7 @@ fun BottomSheet() {
     ) {
         MapScreen(
             itemSpots = itemsState,
+            temporalSpot = tempSpotState,
             onMapClick = {
                 sheetScreenState.value.hideSheet(
                     scaffoldState = scaffoldState,
@@ -128,7 +145,7 @@ fun BottomSheet() {
                 )
                 viewModel.onEvent(MapEvent.Initial)
             },
-            onMapLongClick = {
+            onAddMarkerLongClick = {
                 viewModel.onEvent(MapEvent.OnAddItemLongClick(it))
             },
             onMarkerClick = {
