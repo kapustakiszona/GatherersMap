@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.components
+package com.example.gatherersmap.presentation.ui.components
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -20,7 +20,8 @@ fun TextFieldComponent(
     modifiedItem: ItemSpot,
     focusManager: FocusManager,
     label: String
-){ val focusManager = LocalFocusManager.current
+) {
+    val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = newValue.value,
         onValueChange = { text ->

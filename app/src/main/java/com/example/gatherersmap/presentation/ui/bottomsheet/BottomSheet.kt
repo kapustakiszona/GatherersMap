@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui
+package com.example.gatherersmap.presentation.ui.bottomsheet
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
@@ -16,7 +16,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gatherersmap.data.ItemSpotDatabase
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.navigation.BottomSheetScreenState
-import com.example.gatherersmap.presentation.MapEvent
+import com.example.gatherersmap.presentation.ui.map.MapEvent
+import com.example.gatherersmap.presentation.ui.map.MapScreen
 import com.example.gatherersmap.presentation.vm.MapViewModel
 import com.example.gatherersmap.presentation.vm.MapViewModelFactory
 import kotlinx.coroutines.launch
@@ -24,7 +25,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun BottomSheet() {
+fun BottomSheet(
+    onCameraInvoke: () -> Unit,
+    pictureUri: String
+) {
     val viewModel: MapViewModel =
         viewModel(
             factory = MapViewModelFactory(
@@ -69,7 +73,7 @@ fun BottomSheet() {
         sheetContent = {
 
             when (val currentSheetState = sheetScreenState.value) {
-
+// TODO: добавить анимацию перехода с детейл стейта на эдит при лонгклике
                 is BottomSheetScreenState.Add -> {
                     currentSheetState.showSheet(
                         scope = coroutineScope,
@@ -77,18 +81,27 @@ fun BottomSheet() {
                     )
                     EditDetailsSheetContent(
                         itemSpot = currentSheetState.itemSpot,
+                        onCancelClicked = {
+                            viewModel.onEvent(MapEvent.Initial)
+                            currentSheetState.hideSheet(
+                                scope = coroutineScope,
+                                scaffoldState = scaffoldState
+                            )
+                        },
                         onSaveClicked = { itemSpot ->
                             if (itemSpot.id == 0) {
                                 viewModel.insertItemSpot(itemSpot)
                             } else {
                                 viewModel.updateItemSpot(itemSpot)
                             }
+                            viewModel.onEvent(MapEvent.Initial)
                             currentSheetState.hideSheet(
                                 scope = coroutineScope,
                                 scaffoldState = scaffoldState
                             )
-                            viewModel.onEvent(MapEvent.Initial)
-                        }
+                        },
+                        onAddImageClicked = onCameraInvoke,
+                        pictureUri = pictureUri
                     )
                 }
 
@@ -101,6 +114,10 @@ fun BottomSheet() {
                         itemSpot = currentSheetState.itemSpot,
                         onEditClickListener = {
                             viewModel.onEvent(MapEvent.OnEditItemClick(it))
+                            currentSheetState.hideSheet(
+                                scope = coroutineScope,
+                                scaffoldState = scaffoldState
+                            )
                         },
                         onDeleteClickListener = {
                             viewModel.onEvent(MapEvent.OnDeleteItemClick(it))
@@ -119,6 +136,13 @@ fun BottomSheet() {
                     )
                     EditDetailsSheetContent(
                         itemSpot = currentSheetState.itemSpot,
+                        onCancelClicked = {
+                            viewModel.onEvent(MapEvent.OnDetailsItemClick(it))
+                            currentSheetState.hideSheet(
+                                scope = coroutineScope,
+                                scaffoldState = scaffoldState
+                            )
+                        },
                         onSaveClicked = { itemSpot ->
                             if (itemSpot.id == 0) {
                                 viewModel.insertItemSpot(itemSpot)
@@ -126,7 +150,13 @@ fun BottomSheet() {
                                 viewModel.updateItemSpot(itemSpot)
                             }
                             viewModel.onEvent(MapEvent.OnDetailsItemClick(itemSpot))
-                        }
+                            currentSheetState.hideSheet(
+                                scope = coroutineScope,
+                                scaffoldState = scaffoldState
+                            )
+                        },
+                        onAddImageClicked = onCameraInvoke,
+                        pictureUri = pictureUri
                     )
                 }
 
@@ -150,9 +180,6 @@ fun BottomSheet() {
             },
             onMarkerClick = {
                 viewModel.onEvent(MapEvent.OnDetailsItemClick(it))
-            },
-            onMarkerInfoClick = {
-                viewModel.onEvent(MapEvent.OnDeleteItemClick(it))
             }
         )
     }

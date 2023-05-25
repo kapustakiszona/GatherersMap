@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui
+package com.example.gatherersmap.presentation.ui.map
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,12 +19,13 @@ import com.google.maps.android.compose.MarkerInfoWindow
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
+// TODO: попробовать скрывать детейлсы выбранного маркера после лонгклика 
+// TODO: очищать темпСтейт при стейте деталей 
 @Composable
 fun MapScreen(
     onMapClick: () -> Unit,
     itemSpots: State<MapState>,
     onAddMarkerLongClick: (LatLng) -> Unit,
-    onMarkerInfoClick: (ItemSpot) -> Unit,
     onMarkerClick: (ItemSpot) -> Unit,
     temporalSpot: State<LatLng?>,
 ) {
@@ -59,7 +60,7 @@ fun MapScreen(
                         )
                     ),
                     onInfoWindowClick = {
-                        onMarkerInfoClick(itemSpot)
+                        // TODO: придумать функционал
                     },
                     onClick = {
                         onMarkerClick(itemSpot)

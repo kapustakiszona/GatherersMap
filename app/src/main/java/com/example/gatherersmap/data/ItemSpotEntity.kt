@@ -11,5 +11,5 @@ data class ItemSpotEntity(
     @PrimaryKey(autoGenerate = true) val id: Int,
     var name: String? = null,
     var description: String? = null,
-    var image: Int = R.drawable.detail_image
+    var image: String? = null
 )

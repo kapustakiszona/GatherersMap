@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui
+package com.example.gatherersmap.presentation.ui.bottomsheet
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
