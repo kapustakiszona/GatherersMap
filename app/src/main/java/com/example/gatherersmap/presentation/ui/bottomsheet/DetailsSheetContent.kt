@@ -1,6 +1,7 @@
 package com.example.gatherersmap.presentation.ui.bottomsheet
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,9 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.gatherersmap.R
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.presentation.ui.components.DeletingDialogComposable
@@ -40,6 +44,12 @@ fun DetailsSheetContent(
     onEditClickListener: (ItemSpot) -> Unit,
     onDeleteClickListener: (ItemSpot) -> Unit
 ) {
+    val painter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(itemSpot.image)
+            .build(),
+        fallback = painterResource(R.drawable.image_placeholder),
+    )
     Column(
         modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp)
     ) {
@@ -50,9 +60,9 @@ fun DetailsSheetContent(
             color = MaterialTheme.colors.onBackground
         )
         Spacer(Modifier.height(10.dp))
-        AsyncImage(
+        Image(
             modifier = Modifier.clip(RoundedCornerShape(10.dp)).size(200.dp),
-            model = if (itemSpot.image.isNullOrEmpty()) R.drawable.image_placeholder else itemSpot.image,
+            painter = painter,
             contentDescription = null,
             contentScale = ContentScale.FillBounds
         )

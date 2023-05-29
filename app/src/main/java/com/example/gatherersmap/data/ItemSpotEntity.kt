@@ -2,7 +2,6 @@ package com.example.gatherersmap.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.gatherersmap.R
 
 @Entity
 data class ItemSpotEntity(

@@ -1,7 +1,5 @@
 package com.example.gatherersmap.domain.model
 
-import com.example.gatherersmap.R
-
 data class ItemSpot(
     var lat: Double,
     var lng: Double,

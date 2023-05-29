@@ -25,10 +25,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun BottomSheet(
-    onCameraInvoke: () -> Unit,
-    pictureUri: String
-) {
+fun BottomSheet() {
     val viewModel: MapViewModel =
         viewModel(
             factory = MapViewModelFactory(
@@ -99,9 +96,7 @@ fun BottomSheet(
                                 scope = coroutineScope,
                                 scaffoldState = scaffoldState
                             )
-                        },
-                        onAddImageClicked = onCameraInvoke,
-                        pictureUri = pictureUri
+                        }
                     )
                 }
 
@@ -154,9 +149,7 @@ fun BottomSheet(
                                 scope = coroutineScope,
                                 scaffoldState = scaffoldState
                             )
-                        },
-                        onAddImageClicked = onCameraInvoke,
-                        pictureUri = pictureUri
+                        }
                     )
                 }
 
