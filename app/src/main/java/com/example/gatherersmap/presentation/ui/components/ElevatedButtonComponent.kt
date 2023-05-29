@@ -1,5 +1,6 @@
 package com.example.gatherersmap.presentation.ui.components
 
+import android.graphics.Color
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -15,11 +16,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun ElevatedButtonComponent(
     onClick: () -> Unit,
     iconVector: ImageVector,
+    containerColor: androidx.compose.ui.graphics.Color,
     text: String
 ) {
     ElevatedButton(
@@ -28,7 +31,7 @@ fun ElevatedButtonComponent(
         },
         contentPadding = PaddingValues(start = 14.dp, end = 14.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            containerColor = containerColor,
         )
     ) {
         Icon(
@@ -40,7 +43,8 @@ fun ElevatedButtonComponent(
         Text(
             text = text,
             fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.SansSerif
+            fontFamily = FontFamily.SansSerif,
+            fontSize = 14.sp
         )
     }
 }

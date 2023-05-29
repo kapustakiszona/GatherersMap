@@ -26,18 +26,6 @@ class MapViewModel(
     private val _temporalMarker = MutableStateFlow<LatLng?>(null)
     val temporalMarker = _temporalMarker.asStateFlow()
 
-    private val _temporalPreviewImage = MutableStateFlow<String?>(null)
-    val temporalPreviewImage = _temporalPreviewImage.asStateFlow()
-
-    fun setPreviewImage(imageUri: String) {
-        _temporalPreviewImage.value = imageUri
-    }
-
-
-    private fun removeTemporalPreviewImage() {
-        _temporalPreviewImage.value = null
-    }
-
     init {
         viewModelScope.launch {
             repository.getItemSpots().collect {
@@ -50,7 +38,6 @@ class MapViewModel(
         when (event) {
 
             is MapEvent.Initial -> {
-                removeTemporalPreviewImage()
                 removeTemporalMarker()
                 setDefaultSheetState()
             }

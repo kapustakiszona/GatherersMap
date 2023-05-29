@@ -47,8 +47,8 @@ fun BottomSheet() {
         modifier = Modifier,
         scaffoldState = scaffoldState,
         sheetShape = RoundedCornerShape(
-            topStart = 15.dp,
-            topEnd = 15.dp
+            topStart = 26.dp,
+            topEnd = 26.dp
         ),
         sheetPeekHeight = 0.dp,
         sheetElevation = 20.dp,
