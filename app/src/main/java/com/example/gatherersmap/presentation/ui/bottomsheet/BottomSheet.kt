@@ -5,7 +5,6 @@ import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetState
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FabPosition
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,7 +19,6 @@ import com.example.gatherersmap.presentation.ui.map.MapEvent
 import com.example.gatherersmap.presentation.ui.map.MapScreen
 import com.example.gatherersmap.presentation.vm.MapViewModel
 import com.example.gatherersmap.presentation.vm.MapViewModelFactory
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -52,21 +50,6 @@ fun BottomSheet() {
         ),
         sheetPeekHeight = 0.dp,
         sheetElevation = 20.dp,
-        floatingActionButton = {
-            // TODO: button for test
-            DefiningPositionFab(
-                onFabClickListener = {
-                    coroutineScope.launch {
-                        if (scaffoldState.bottomSheetState.isCollapsed) {
-                            scaffoldState.bottomSheetState.expand()
-                        } else {
-                            scaffoldState.bottomSheetState.collapse()
-                        }
-                    }
-                }
-            )
-        },
-        floatingActionButtonPosition = FabPosition.End,
         sheetContent = {
 
             when (val currentSheetState = sheetScreenState.value) {

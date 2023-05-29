@@ -48,31 +48,31 @@ fun ImagePicker(
 
 
     Column {
-            ElevatedButtonComponent(
-                onClick = {
-                    hasImage = false
-                    val uri = ComposeFileProvider.getImageUri(context)
-                    imageUri = uri
-                    cameraLauncher.launch(uri)
+        ElevatedButtonComponent(
+            onClick = {
+                hasImage = false
+                val uri = ComposeFileProvider.getImageUri(context)
+                imageUri = uri
+                cameraLauncher.launch(uri)
 
-                },
-                iconVector = ImageVector.vectorResource(R.drawable.add_photo),
-                text = "Add photo",
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            )
-            ElevatedButtonComponent(
-                onClick = {
-                    hasImage = false
-                    photoPicker.launch(
-                        PickVisualMediaRequest(
-                            ActivityResultContracts.PickVisualMedia.ImageOnly
-                        )
+            },
+            iconVector = ImageVector.vectorResource(R.drawable.add_photo),
+            text = "Add photo",
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+        ElevatedButtonComponent(
+            onClick = {
+                hasImage = false
+                photoPicker.launch(
+                    PickVisualMediaRequest(
+                        ActivityResultContracts.PickVisualMedia.ImageOnly
                     )
-                },
-                iconVector = Icons.Outlined.Add,
-                text = "Images",
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            )
+                )
+            },
+            iconVector = Icons.Outlined.Add,
+            text = "Images",
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
         if (hasImage && imageUri != null) {
             val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
             context.contentResolver.takePersistableUriPermission(imageUri!!, flag)
