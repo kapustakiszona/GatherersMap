@@ -29,12 +29,14 @@ fun ImagePicker(
 
     var hasImage by remember { mutableStateOf(false) }
 
+    var hasCameraImage by remember { mutableStateOf(false) }
+
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
-            hasImage = success
+            hasCameraImage = success
         }
     )
 
@@ -50,7 +52,7 @@ fun ImagePicker(
     Column {
         ElevatedButtonComponent(
             onClick = {
-                hasImage = false
+                hasCameraImage = false
                 val uri = ComposeFileProvider.getImageUri(context)
                 imageUri = uri
                 cameraLauncher.launch(uri)
@@ -76,6 +78,8 @@ fun ImagePicker(
         if (hasImage && imageUri != null) {
             val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
             context.contentResolver.takePersistableUriPermission(imageUri!!, flag)
+            onImagePick(imageUri.toString())
+        } else if (hasCameraImage && imageUri != null) {
             onImagePick(imageUri.toString())
         }
     }

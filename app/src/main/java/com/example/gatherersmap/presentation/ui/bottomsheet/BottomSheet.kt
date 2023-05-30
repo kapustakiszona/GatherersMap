@@ -69,16 +69,12 @@ fun BottomSheet() {
                             )
                         },
                         onSaveClicked = { itemSpot ->
-                            if (itemSpot.id == 0) {
-                                viewModel.insertItemSpot(itemSpot)
-                            } else {
-                                viewModel.updateItemSpot(itemSpot)
-                            }
-                            viewModel.onEvent(MapEvent.Initial)
+                            viewModel.insertItemSpot(itemSpot)
                             currentSheetState.hideSheet(
                                 scope = coroutineScope,
                                 scaffoldState = scaffoldState
                             )
+                            viewModel.onEvent(MapEvent.Initial)
                         }
                     )
                 }
@@ -122,16 +118,12 @@ fun BottomSheet() {
                             )
                         },
                         onSaveClicked = { itemSpot ->
-                            if (itemSpot.id == 0) {
-                                viewModel.insertItemSpot(itemSpot)
-                            } else {
-                                viewModel.updateItemSpot(itemSpot)
-                            }
-                            viewModel.onEvent(MapEvent.OnDetailsItemClick(itemSpot))
+                            viewModel.updateItemSpot(itemSpot)
                             currentSheetState.hideSheet(
                                 scope = coroutineScope,
                                 scaffoldState = scaffoldState
                             )
+                            viewModel.onEvent(MapEvent.OnDetailsItemClick(itemSpot))
                         }
                     )
                 }

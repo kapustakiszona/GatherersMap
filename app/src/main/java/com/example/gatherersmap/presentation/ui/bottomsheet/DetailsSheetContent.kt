@@ -68,18 +68,20 @@ fun DetailsSheetContent(
         )
         Spacer(Modifier.height(10.dp))
         Buttons(
-            itemSpot = itemSpot,
-            onEditClickListener = onEditClickListener,
-            onDeleteClickListener = onDeleteClickListener
+            onEditClickListener = {
+                onEditClickListener(itemSpot)
+            },
+            onDeleteClickListener = {
+                onDeleteClickListener(itemSpot)
+            }
         )
     }
 }
 
 @Composable
 private fun Buttons(
-    itemSpot: ItemSpot,
-    onEditClickListener: (ItemSpot) -> Unit,
-    onDeleteClickListener: (ItemSpot) -> Unit
+    onEditClickListener: () -> Unit,
+    onDeleteClickListener: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -94,14 +96,14 @@ private fun Buttons(
             if (showDialog) {
                 DeletingDialogComposable(
                     onDeleteItem = {
-                        onDeleteClickListener(itemSpot)
+                        onDeleteClickListener()
                     },
                     onClose = { showDialog = false }
                 )
             }
             ElevatedButtonComponent(
                 onClick = {
-                    onEditClickListener(itemSpot)
+                    onEditClickListener()
                 },
                 iconVector = Icons.Outlined.Edit,
                 text = "Edit",

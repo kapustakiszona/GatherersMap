@@ -107,13 +107,13 @@ fun EditDetailsSheetContent(
         }
         Spacer(modifier = Modifier.height(8.dp))
         Buttons(
-            itemSpot = itemSpot,
-            modifiedItem = modifiedItem,
             onSaveClicked = {
                 modifiedItem.image = tempImage
-                onSaveClicked(it)
+                onSaveClicked(modifiedItem)
             },
-            onCancelClicked = onCancelClicked
+            onCancelClicked = {
+                onCancelClicked(itemSpot)
+            }
         )
     }
 }
@@ -121,10 +121,8 @@ fun EditDetailsSheetContent(
 
 @Composable
 private fun Buttons(
-    itemSpot: ItemSpot,
-    modifiedItem: ItemSpot,
-    onSaveClicked: (ItemSpot) -> Unit,
-    onCancelClicked: (ItemSpot) -> Unit,
+    onSaveClicked: () -> Unit,
+    onCancelClicked: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -137,19 +135,19 @@ private fun Buttons(
         ) {
             ElevatedButtonComponent(
                 onClick = {
-                    onSaveClicked(modifiedItem)
+                    onCancelClicked()
                 },
-                iconVector = Icons.Outlined.Check,
-                text = "Save",
+                iconVector = Icons.Outlined.Close,
+                text = "Cancel",
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             )
             Spacer(modifier = Modifier.width(4.dp))
             ElevatedButtonComponent(
                 onClick = {
-                    onCancelClicked(itemSpot)
+                    onSaveClicked()
                 },
-                iconVector = Icons.Outlined.Close,
-                text = "Cancel",
+                iconVector = Icons.Outlined.Check,
+                text = "Save",
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             )
         }
