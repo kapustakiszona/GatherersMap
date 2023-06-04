@@ -93,5 +93,6 @@ dependencies {
     implementation "androidx.room:room-ktx:2.5.1"
     //rebugger
     implementation 'com.github.theapache64:rebugger:1.0.0-alpha05'
-
+    //coil
+    implementation 'io.coil-kt:coil-compose:2.4.0'
 }

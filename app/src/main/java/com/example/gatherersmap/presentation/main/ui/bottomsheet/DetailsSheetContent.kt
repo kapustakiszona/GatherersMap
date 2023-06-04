@@ -1,31 +1,39 @@
-package com.example.gatherersmap.presentation.ui
+package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import com.example.gatherersmap.R
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.presentation.components.DeletingDialogComposable
 import com.example.gatherersmap.presentation.components.ElevatedButtonComponent
@@ -36,40 +44,70 @@ fun DetailsSheetContent(
     onEditClickListener: (ItemSpot) -> Unit,
     onDeleteClickListener: (ItemSpot) -> Unit
 ) {
+    val painter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(itemSpot.image)
+            .build(),
+        fallback = painterResource(R.drawable.image_placeholder)
+    )
     Column(
-        modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp),
-
-        ) {
+        modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp)
+    ) {
         Text(text = "${itemSpot.name}  id:${itemSpot.id}", fontSize = 26.sp)
         Text(
             text = itemSpot.description,
             fontSize = 16.sp,
-            color = MaterialTheme.colors.onBackground
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(Modifier.height(10.dp))
         Image(
             modifier = Modifier.clip(RoundedCornerShape(10.dp)).size(200.dp),
-            painter = painterResource(id = itemSpot.image),
+            painter = painter,
             contentDescription = null,
             contentScale = ContentScale.FillBounds
         )
-        Row {
+        Spacer(Modifier.height(10.dp))
+        Buttons(
+            onEditClickListener = {
+                onEditClickListener(itemSpot)
+            },
+            onDeleteClickListener = {
+                onDeleteClickListener(itemSpot)
+            }
+        )
+    }
+}
+
+@Composable
+private fun Buttons(
+    onEditClickListener: () -> Unit,
+    onDeleteClickListener: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier.clip(shape = CircleShape)
+                .background(color = MaterialTheme.colorScheme.secondaryContainer)
+                .padding(start = 4.dp, end = 4.dp)
+        ) {
             var showDialog by remember { mutableStateOf(false) }
             if (showDialog) {
                 DeletingDialogComposable(
                     onDeleteItem = {
-                        onDeleteClickListener(itemSpot)
+                        onDeleteClickListener()
                     },
                     onClose = { showDialog = false }
                 )
             }
-
             ElevatedButtonComponent(
                 onClick = {
-                    onEditClickListener(itemSpot)
+                    onEditClickListener()
                 },
                 iconVector = Icons.Outlined.Edit,
-                text = "Edit"
+                text = "Edit",
+                containerColor = MaterialTheme.colorScheme.primaryContainer
             )
             Spacer(modifier = Modifier.width(10.dp))
             ElevatedButtonComponent(
@@ -77,7 +115,8 @@ fun DetailsSheetContent(
                     showDialog = true
                 },
                 iconVector = Icons.Outlined.Delete,
-                text = "Delete"
+                text = "Delete",
+                containerColor = MaterialTheme.colorScheme.primaryContainer
             )
         }
     }

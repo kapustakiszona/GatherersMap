@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.vm
+package com.example.gatherersmap.presentation.main.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

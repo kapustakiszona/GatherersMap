@@ -1,11 +1,10 @@
-package com.example.gatherersmap.presentation.ui
+package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetState
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FabPosition
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,10 +15,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gatherersmap.data.ItemSpotDatabase
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.navigation.BottomSheetScreenState
-import com.example.gatherersmap.presentation.MapEvent
-import com.example.gatherersmap.presentation.vm.MapViewModel
-import com.example.gatherersmap.presentation.vm.MapViewModelFactory
-import kotlinx.coroutines.launch
+import com.example.gatherersmap.presentation.main.ui.map.MapEvent
+import com.example.gatherersmap.presentation.main.ui.map.MapScreen
+import com.example.gatherersmap.presentation.main.vm.MapViewModel
+import com.example.gatherersmap.presentation.main.vm.MapViewModelFactory
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -46,30 +45,15 @@ fun BottomSheet() {
         modifier = Modifier,
         scaffoldState = scaffoldState,
         sheetShape = RoundedCornerShape(
-            topStart = 15.dp,
-            topEnd = 15.dp
+            topStart = 26.dp,
+            topEnd = 26.dp
         ),
         sheetPeekHeight = 0.dp,
         sheetElevation = 20.dp,
-        floatingActionButton = {
-            // TODO: button for test
-            DefiningPositionFab(
-                onFabClickListener = {
-                    coroutineScope.launch {
-                        if (scaffoldState.bottomSheetState.isCollapsed) {
-                            scaffoldState.bottomSheetState.expand()
-                        } else {
-                            scaffoldState.bottomSheetState.collapse()
-                        }
-                    }
-                }
-            )
-        },
-        floatingActionButtonPosition = FabPosition.End,
         sheetContent = {
 
             when (val currentSheetState = sheetScreenState.value) {
-
+// TODO: добавить анимацию перехода с детейл стейта на эдит при лонгклике
                 is BottomSheetScreenState.Add -> {
                     currentSheetState.showSheet(
                         scope = coroutineScope,
@@ -77,12 +61,15 @@ fun BottomSheet() {
                     )
                     EditDetailsSheetContent(
                         itemSpot = currentSheetState.itemSpot,
+                        onCancelClicked = {
+                            viewModel.onEvent(MapEvent.Initial)
+                            currentSheetState.hideSheet(
+                                scope = coroutineScope,
+                                scaffoldState = scaffoldState
+                            )
+                        },
                         onSaveClicked = { itemSpot ->
-                            if (itemSpot.id == 0) {
-                                viewModel.insertItemSpot(itemSpot)
-                            } else {
-                                viewModel.updateItemSpot(itemSpot)
-                            }
+                            viewModel.insertItemSpot(itemSpot)
                             currentSheetState.hideSheet(
                                 scope = coroutineScope,
                                 scaffoldState = scaffoldState
@@ -101,6 +88,10 @@ fun BottomSheet() {
                         itemSpot = currentSheetState.itemSpot,
                         onEditClickListener = {
                             viewModel.onEvent(MapEvent.OnEditItemClick(it))
+                            currentSheetState.hideSheet(
+                                scope = coroutineScope,
+                                scaffoldState = scaffoldState
+                            )
                         },
                         onDeleteClickListener = {
                             viewModel.onEvent(MapEvent.OnDeleteItemClick(it))
@@ -119,12 +110,19 @@ fun BottomSheet() {
                     )
                     EditDetailsSheetContent(
                         itemSpot = currentSheetState.itemSpot,
+                        onCancelClicked = {
+                            viewModel.onEvent(MapEvent.OnDetailsItemClick(it))
+                            currentSheetState.hideSheet(
+                                scope = coroutineScope,
+                                scaffoldState = scaffoldState
+                            )
+                        },
                         onSaveClicked = { itemSpot ->
-                            if (itemSpot.id == 0) {
-                                viewModel.insertItemSpot(itemSpot)
-                            } else {
-                                viewModel.updateItemSpot(itemSpot)
-                            }
+                            viewModel.updateItemSpot(itemSpot)
+                            currentSheetState.hideSheet(
+                                scope = coroutineScope,
+                                scaffoldState = scaffoldState
+                            )
                             viewModel.onEvent(MapEvent.OnDetailsItemClick(itemSpot))
                         }
                     )
@@ -150,9 +148,6 @@ fun BottomSheet() {
             },
             onMarkerClick = {
                 viewModel.onEvent(MapEvent.OnDetailsItemClick(it))
-            },
-            onMarkerInfoClick = {
-                viewModel.onEvent(MapEvent.OnDeleteItemClick(it))
             }
         )
     }

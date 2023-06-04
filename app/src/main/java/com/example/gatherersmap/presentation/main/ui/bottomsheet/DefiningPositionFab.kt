@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui
+package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
