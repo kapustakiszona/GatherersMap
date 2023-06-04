@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.camera
+package com.example.gatherersmap.presentation.components.imagePicker
 
 import android.content.Intent
 import android.net.Uri
@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import com.example.gatherersmap.R
-import com.example.gatherersmap.presentation.ui.components.ElevatedButtonComponent
+import com.example.gatherersmap.presentation.components.ElevatedButtonComponent
 
 @Composable
 fun ImagePicker(

@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui.components
+package com.example.gatherersmap.presentation.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer

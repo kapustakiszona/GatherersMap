@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui.map
+package com.example.gatherersmap.presentation.main.ui.map
 
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.google.android.gms.maps.model.LatLng

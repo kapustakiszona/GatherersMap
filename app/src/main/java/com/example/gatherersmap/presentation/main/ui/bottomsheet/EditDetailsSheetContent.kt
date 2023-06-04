@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui.bottomsheet
+package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -34,12 +34,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.example.gatherersmap.MainActivity.Companion.TAG
+import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.R
 import com.example.gatherersmap.domain.model.ItemSpot
-import com.example.gatherersmap.presentation.camera.ImagePicker
-import com.example.gatherersmap.presentation.ui.components.ElevatedButtonComponent
-import com.example.gatherersmap.presentation.ui.components.TextFieldComponent
+import com.example.gatherersmap.presentation.components.imagePicker.ImagePicker
+import com.example.gatherersmap.presentation.components.ElevatedButtonComponent
+import com.example.gatherersmap.presentation.components.TextFieldComponent
 
 @Composable
 fun EditDetailsSheetContent(

@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui.bottomsheet
+package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 
 import androidx.compose.foundation.Image
@@ -35,8 +35,8 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.gatherersmap.R
 import com.example.gatherersmap.domain.model.ItemSpot
-import com.example.gatherersmap.presentation.ui.components.DeletingDialogComposable
-import com.example.gatherersmap.presentation.ui.components.ElevatedButtonComponent
+import com.example.gatherersmap.presentation.components.DeletingDialogComposable
+import com.example.gatherersmap.presentation.components.ElevatedButtonComponent
 
 @Composable
 fun DetailsSheetContent(

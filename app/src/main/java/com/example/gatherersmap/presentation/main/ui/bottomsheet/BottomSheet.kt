@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui.bottomsheet
+package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
@@ -15,10 +15,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gatherersmap.data.ItemSpotDatabase
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.navigation.BottomSheetScreenState
-import com.example.gatherersmap.presentation.ui.map.MapEvent
-import com.example.gatherersmap.presentation.ui.map.MapScreen
-import com.example.gatherersmap.presentation.vm.MapViewModel
-import com.example.gatherersmap.presentation.vm.MapViewModelFactory
+import com.example.gatherersmap.presentation.main.ui.map.MapEvent
+import com.example.gatherersmap.presentation.main.ui.map.MapScreen
+import com.example.gatherersmap.presentation.main.vm.MapViewModel
+import com.example.gatherersmap.presentation.main.vm.MapViewModelFactory
 
 
 @OptIn(ExperimentalMaterialApi::class)

@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui.map
+package com.example.gatherersmap.presentation.main.ui.map
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,7 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.example.gatherersmap.domain.model.ItemSpot
-import com.example.gatherersmap.presentation.vm.MapState
+import com.example.gatherersmap.presentation.main.vm.MapState
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ORANGE
 import com.google.android.gms.maps.model.LatLng

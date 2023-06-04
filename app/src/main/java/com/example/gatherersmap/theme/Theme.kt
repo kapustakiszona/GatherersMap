@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui.theme
+package com.example.gatherersmap.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

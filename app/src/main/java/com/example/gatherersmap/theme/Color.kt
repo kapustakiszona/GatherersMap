@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui.theme
+package com.example.gatherersmap.theme
 import androidx.compose.ui.graphics.Color
 
 val md_theme_light_primary = Color(0xFF506600)

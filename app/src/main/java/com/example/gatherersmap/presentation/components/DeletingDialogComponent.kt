@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.ui.components
+package com.example.gatherersmap.presentation.components
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text

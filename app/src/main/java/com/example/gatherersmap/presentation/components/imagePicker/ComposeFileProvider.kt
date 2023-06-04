@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.camera
+package com.example.gatherersmap.presentation.components.imagePicker
 
 import android.content.Context
 import android.net.Uri

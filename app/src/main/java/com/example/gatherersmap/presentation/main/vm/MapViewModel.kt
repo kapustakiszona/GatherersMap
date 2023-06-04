@@ -1,11 +1,11 @@
-package com.example.gatherersmap.presentation.vm
+package com.example.gatherersmap.presentation.main.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.navigation.BottomSheetScreenState
-import com.example.gatherersmap.presentation.ui.map.MapEvent
+import com.example.gatherersmap.presentation.main.ui.map.MapEvent
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
