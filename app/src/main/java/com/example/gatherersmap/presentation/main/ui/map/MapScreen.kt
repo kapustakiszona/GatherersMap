@@ -15,6 +15,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ORANGE
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MarkerInfoWindow
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -32,10 +34,14 @@ fun MapScreen(
     val oldMarkersList: MutableList<Marker>? = null
     val cameraPositionState =
         rememberCameraPositionState()
+    val uiSettings = remember { MapUiSettings(myLocationButtonEnabled = true) }
+    val properties by remember { mutableStateOf(MapProperties(isMyLocationEnabled = true)) }
 
     Box(Modifier.fillMaxSize()) {
         GoogleMap(
             modifier = Modifier.matchParentSize(),
+//            properties = properties,
+//            uiSettings = uiSettings,
             cameraPositionState = cameraPositionState,
             onMapLongClick = { latLng ->
                 onAddMarkerLongClick(latLng)

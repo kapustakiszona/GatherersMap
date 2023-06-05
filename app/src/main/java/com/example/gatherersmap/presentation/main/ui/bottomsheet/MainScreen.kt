@@ -2,10 +2,10 @@ package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
-import androidx.compose.material.BottomSheetState
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
@@ -23,7 +23,7 @@ import com.example.gatherersmap.presentation.main.vm.MapViewModelFactory
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun BottomSheet() {
+fun MainScreen() {
     val viewModel: MapViewModel =
         viewModel(
             factory = MapViewModelFactory(
@@ -33,7 +33,7 @@ fun BottomSheet() {
             )
         )
     val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
+        bottomSheetState = rememberBottomSheetState(BottomSheetValue.Collapsed)
     )
     val itemsState = viewModel.itemsState.collectAsState()
     val sheetScreenState =
