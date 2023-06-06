@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,6 +26,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,6 +36,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,6 +49,7 @@ import com.example.gatherersmap.presentation.main.ui.bottomsheet.MainScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 
@@ -60,6 +64,7 @@ fun RequestPermission(
     HandleRequest(
         permissionState = permissionState,
         deniedContent = { shouldShowRationale ->
+            Log.d(TAG, "permissionState.status: ${permissionState.status.isGranted}")
             PermissionDeniedContent(
                 rationaleMessage = rationaleMessage,
                 shouldShowRationale = shouldShowRationale,
@@ -90,66 +95,76 @@ fun HandleRequest(
     }
 }
 
-@Composable
-fun Content(showButton: Boolean = true, onClick: () -> Unit) {
-    if (showButton) {
-        val enableLocation = remember { mutableStateOf(true) }
-        if (enableLocation.value) {
-            MainDialogLocation(
-                title = "Turn On Location Service",
-                desc =
-                "Embark on a journey with Gatherers Map, the app that allows you to mark and track your mushroom findings." +
-                        " Explore the world without losing your way and effortlessly keep track of your current location." +
-                        "\n\n Grant this app a permission to proceed. If you encounter any issues, you can manually enable it from the settings.",
-                enableLocation = enableLocation,
-                onClick = onClick
-            )
-        } else{
-            MainScreen()
-        }
-    }
-}
-
 @ExperimentalPermissionsApi
 @Composable
 fun PermissionDeniedContent(
     rationaleMessage: String,
     shouldShowRationale: Boolean,
-    onRequestPermission: () -> Unit
+    onRequestPermission: () -> Unit,
 ) {
-
+    var showMainScreen by remember { mutableStateOf(false) }
+    var isOneButtonDialogShowed by remember { mutableStateOf(true) }
+    var countDenyClicks by remember { mutableIntStateOf(0) }
     if (shouldShowRationale) {
-
         OneButtonDialog(
             title = "Permission Request",
             description = rationaleMessage,
-            onClick = onRequestPermission,
+            onClick = {
+                ++countDenyClicks
+                onRequestPermission()
+            },
             textButton = "Give Permission"
         )
-//        AlertDialog(
-//            onDismissRequest = {},
-//            title = {
-//                Text(
-//                    text = "Permission Request",
-//                    style = TextStyle(
-//                        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-//                        fontWeight = FontWeight.Bold
-//                    )
-//                )
-//            },
-//            text = {
-//                Text(rationaleMessage)
-//            },
-//            confirmButton = {
-//                Button(onClick = onRequestPermission) {
-//                    Text("Give Permission")
-//                }
-//            }
-//        )
-    } else {
+    } else if (countDenyClicks == 0) {
         Content(onClick = onRequestPermission)
+    } else {
+        if (showMainScreen) {
+            MainScreen()
+        }
+        if (isOneButtonDialogShowed) {
+            OneButtonDialog(
+                title = stringResource(R.string.title_premission_denied_dialog),
+                description = stringResource(R.string.description_permission_denied_dialog),
+                onClick = {
+                    showMainScreen = true
+                    isOneButtonDialogShowed = false
+                },
+                textButton = stringResource(R.string.button_permission_denied_dialog)
+            )
+        }
     }
 }
+
+@Composable
+fun Content(onClick: () -> Unit) {
+    val enableLocation = remember { mutableStateOf(true) }
+    var showMainScreen by remember { mutableStateOf(false) }
+    var isOneButtonDialogShowed by remember { mutableStateOf(true) }
+    if (enableLocation.value) {
+        AskPermissionsDialog(
+            title = stringResource(R.string.title_ask_permission_dialog),
+            desc = stringResource(R.string.description_ask_permission_dialog),
+            enableLocation = enableLocation,
+            onClick = onClick
+        )
+    } else {
+        if (showMainScreen) {
+            MainScreen()
+        }
+        if (isOneButtonDialogShowed) {
+            OneButtonDialog(
+                title = stringResource(R.string.title_premission_denied_dialog),
+                description = stringResource(R.string.description_permission_denied_dialog),
+                onClick = {
+                    showMainScreen = true
+                    isOneButtonDialogShowed = false
+                },
+                textButton = stringResource(R.string.button_permission_denied_dialog)
+            )
+        }
+    }
+}
+
 
 @Composable
 fun OneButtonDialog(
@@ -158,7 +173,6 @@ fun OneButtonDialog(
     onClick: () -> Unit,
     textButton: String
 ) {
-    Log.d(TAG, "Dialog called")
     AlertDialog(
         onDismissRequest = {},
         title = {
@@ -186,7 +200,7 @@ fun OneButtonDialog(
 }
 
 @Composable
-fun MainDialogLocation(
+fun AskPermissionsDialog(
     title: String,
     desc: String,
     enableLocation: MutableState<Boolean>,
@@ -217,7 +231,7 @@ fun MainDialogLocation(
                         .padding(top = 5.dp)
                         .height(220.dp)
                         .fillMaxWidth(),
-                    )
+                )
                 //Text: title
                 Text(
                     text = title,
@@ -258,7 +272,7 @@ fun MainDialogLocation(
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-
+                    Log.d(TAG, "Enable button clicked")
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
