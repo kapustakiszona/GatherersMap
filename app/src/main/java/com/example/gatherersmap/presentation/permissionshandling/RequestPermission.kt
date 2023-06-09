@@ -26,20 +26,20 @@ fun RequestPermission(
     showMainScreen: (Boolean) -> Unit
 ) {
     val permissionState = rememberPermissionState(permission)
-    val showMainScreenState = remember {
-        mutableStateOf(false)
-    }
 
     HandleRequest(
         permissionState = permissionState,
         deniedContent = { shouldShowRationale ->
             PermissionDeniedContent(
                 shouldShowRationale = shouldShowRationale,
-                onRequestPermission = { permissionState.launchPermissionRequest() }
+                onRequestPermission = { permissionState.launchPermissionRequest() },
+                showContent = {
+                    showMainScreen(it)
+                }
             )
         },
-        content = {
-            MainScreen()
+        showContent = {
+            showMainScreen(it)
         }
     )
 }
@@ -49,11 +49,11 @@ fun RequestPermission(
 fun HandleRequest(
     permissionState: PermissionState,
     deniedContent: @Composable (Boolean) -> Unit,
-    content: @Composable () -> Unit
+    showContent: @Composable (Boolean) -> Unit
 ) {
     when (permissionState.status) {
         is PermissionStatus.Granted -> {
-            content()
+            showContent(true)
         }
 
         is PermissionStatus.Denied -> {
@@ -67,8 +67,8 @@ fun HandleRequest(
 fun PermissionDeniedContent(
     shouldShowRationale: Boolean,
     onRequestPermission: () -> Unit,
+    showContent: (Boolean) -> Unit
 ) {
-    var showMainScreen by remember { mutableStateOf(false) }
     var isCancelPermissionDialogShowed by remember { mutableStateOf(true) }
     var countDenyClicks by remember { mutableIntStateOf(0) }
     if (shouldShowRationale) {
@@ -82,17 +82,19 @@ fun PermissionDeniedContent(
             textButton = "Give Permission"
         )
     } else if (countDenyClicks == 0) {
-        Content(onEnablePermissionsClick = onRequestPermission)
+        Content(
+            onEnablePermissionsClick = onRequestPermission,
+            showMainScreen = {
+                showContent(it)
+            }
+        )
     } else {
-        if (showMainScreen) {
-            MainScreen()
-        }
         if (isCancelPermissionDialogShowed) {
             AlertDialogComponent(
                 title = stringResource(R.string.title_premission_denied_dialog),
                 description = stringResource(R.string.description_permission_denied_dialog),
                 onClick = {
-                    showMainScreen = true
+                    showContent(true)
                     isCancelPermissionDialogShowed = false
                 },
                 textButton = stringResource(R.string.button_permission_denied_dialog)
@@ -102,9 +104,11 @@ fun PermissionDeniedContent(
 }
 
 @Composable
-fun Content(onEnablePermissionsClick: () -> Unit) {
+fun Content(
+    onEnablePermissionsClick: () -> Unit,
+    showMainScreen: (Boolean) -> Unit
+) {
     val enablePermissionsState = remember { mutableStateOf(true) }
-    var showMainScreen by remember { mutableStateOf(false) }
     var isCancelPermissionDialogShowed by remember { mutableStateOf(true) }
     if (enablePermissionsState.value) {
         CustomDialogComponent(
@@ -115,20 +119,15 @@ fun Content(onEnablePermissionsClick: () -> Unit) {
             },
             onEnablePermissionsClick = onEnablePermissionsClick
         )
-    } else {
-        if (showMainScreen) {
-            MainScreen()
-        }
-        if (isCancelPermissionDialogShowed) {
-            AlertDialogComponent(
-                title = stringResource(R.string.title_premission_denied_dialog),
-                description = stringResource(R.string.description_permission_denied_dialog),
-                onClick = {
-                    showMainScreen = true
-                    isCancelPermissionDialogShowed = false
-                },
-                textButton = stringResource(R.string.button_permission_denied_dialog)
-            )
-        }
+    } else if (isCancelPermissionDialogShowed) {
+        AlertDialogComponent(
+            title = stringResource(R.string.title_premission_denied_dialog),
+            description = stringResource(R.string.description_permission_denied_dialog),
+            onClick = {
+                showMainScreen(true)
+                isCancelPermissionDialogShowed = false
+            },
+            textButton = stringResource(R.string.button_permission_denied_dialog)
+        )
     }
 }
