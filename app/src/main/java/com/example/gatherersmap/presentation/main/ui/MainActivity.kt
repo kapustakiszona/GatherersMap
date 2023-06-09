@@ -1,5 +1,6 @@
 package com.example.gatherersmap.presentation.main.ui
 
+import android.Manifest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,7 +23,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    RequestPermission(permission = android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    RequestPermission(permission = Manifest.permission.ACCESS_FINE_LOCATION,
+                    showMainScreen = {
+
+                    })
                 }
             }
         }
