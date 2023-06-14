@@ -36,7 +36,7 @@ fun MapScreen(
         rememberCameraPositionState()
     val uiSettings = remember { MapUiSettings(myLocationButtonEnabled = true) }
     val properties by remember { mutableStateOf(MapProperties(isMyLocationEnabled = true)) }
-
+// TODO: При первом запуске приложения не устанавливается превью для первого маркера
     Box(Modifier.fillMaxSize()) {
         GoogleMap(
             modifier = Modifier.matchParentSize(),

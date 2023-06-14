@@ -4,6 +4,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FabPosition
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -19,8 +20,10 @@ import com.example.gatherersmap.presentation.main.ui.map.MapEvent
 import com.example.gatherersmap.presentation.main.ui.map.MapScreen
 import com.example.gatherersmap.presentation.main.vm.MapViewModel
 import com.example.gatherersmap.presentation.main.vm.MapViewModelFactory
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 
+@ExperimentalPermissionsApi
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen() {
@@ -50,6 +53,10 @@ fun MainScreen() {
         ),
         sheetPeekHeight = 0.dp,
         sheetElevation = 20.dp,
+        floatingActionButton = {
+            MyLocationFab()
+        },
+        floatingActionButtonPosition = FabPosition.End,
         sheetContent = {
 
             when (val currentSheetState = sheetScreenState.value) {

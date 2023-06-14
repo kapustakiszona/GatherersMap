@@ -97,4 +97,6 @@ dependencies {
     implementation 'io.coil-kt:coil-compose:2.4.0'
     //accompanist permissions
     implementation "com.google.accompanist:accompanist-permissions:0.31.3-beta"
+    //DataStore preferences
+    implementation 'androidx.datastore:datastore-preferences:1.0.0'
 }
