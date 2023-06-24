@@ -42,6 +42,7 @@ fun MainScreen() {
     val sheetScreenState =
         viewModel.sheetState.collectAsState(BottomSheetScreenState.Initial)
     val tempSpotState = viewModel.temporalMarker.collectAsState()
+    val snackBarHostState = scaffoldState.snackbarHostState
     val coroutineScope = rememberCoroutineScope()
 
     BottomSheetScaffold(
@@ -54,13 +55,14 @@ fun MainScreen() {
         sheetPeekHeight = 0.dp,
         sheetElevation = 20.dp,
         floatingActionButton = {
-            MyLocationFab()
+            MyLocation(
+                snackBarHostState = snackBarHostState
+            )
         },
         floatingActionButtonPosition = FabPosition.End,
         sheetContent = {
-
             when (val currentSheetState = sheetScreenState.value) {
-// TODO: добавить анимацию перехода с детейл стейта на эдит при лонгклике
+                // TODO: добавить анимацию перехода с детейл стейта на эдит при лонгклике
                 is BottomSheetScreenState.Add -> {
                     currentSheetState.showSheet(
                         scope = coroutineScope,

@@ -14,7 +14,7 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
 )
 
 class DataStoreManager(context: Context) {
-    val dataStore = context.dataStore
+    private val dataStore = context.dataStore
     fun getPermissionRequestStatus() = dataStore.data.map { preferences ->
         return@map preferences[REQUEST_STATUS] ?: false
     }

@@ -2,11 +2,12 @@ package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,28 +17,33 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.gatherersmap.R
 import com.example.gatherersmap.data.datastore.DataStore
-import com.example.gatherersmap.presentation.components.AlertDialogComponent
 import com.example.gatherersmap.presentation.permissionshandling.PermissionRequest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.shouldShowRationale
 
 
 @ExperimentalPermissionsApi
 @Composable
-fun MyLocationFab(
-    onFabClickListener: () -> Unit = {},
+fun MyLocation(
+    snackBarHostState: SnackbarHostState,
 ) {
-    var launchRequestPermission by remember { mutableStateOf(false) }
-    if (launchRequestPermission) {
+    var requestState by remember { mutableStateOf(false) }
+    val dataStoreManager = DataStore.getDataStore()
+    val hasInitialRequest =
+        dataStoreManager.getPermissionRequestStatus()
+            .collectAsState(true)
+    if (requestState) {
         PermissionRequest(
-            dataStoreManager = DataStore.getDataStore(),
-            isRequestCalled = launchRequestPermission
+            hasInitialRequest = hasInitialRequest.value,
+            dataStoreManager = dataStoreManager,
+            snackBarHostState = snackBarHostState,
+            resultCallback = {
+                requestState = it
+            }
         )
     }
     FloatingActionButton(
         onClick = {
-            launchRequestPermission = true
+            requestState = true
         },
         shape = CircleShape,
         content = {
