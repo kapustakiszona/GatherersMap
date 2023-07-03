@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
@@ -27,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -34,18 +34,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.R
 import com.example.gatherersmap.domain.model.ItemSpot
-import com.example.gatherersmap.presentation.components.imagePicker.ImagePicker
-import com.example.gatherersmap.presentation.components.ElevatedButtonComponent
+import com.example.gatherersmap.presentation.components.GradientButtonComponent
 import com.example.gatherersmap.presentation.components.TextFieldComponent
+import com.example.gatherersmap.presentation.components.imagePicker.ImagePicker
+import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 
 @Composable
 fun EditDetailsSheetContent(
     itemSpot: ItemSpot,
     onSaveClicked: (ItemSpot) -> Unit,
-    onCancelClicked: (ItemSpot) -> Unit
+    onCancelClicked: (ItemSpot) -> Unit,
 ) {
     val modifiedItem by remember { mutableStateOf(itemSpot) }
     var tempImage by rememberSaveable { mutableStateOf(itemSpot.image) }
@@ -64,7 +64,13 @@ fun EditDetailsSheetContent(
 
 
     Column(
-        modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp)
+        modifier = Modifier
+//            .paint(
+//                painter = painterResource(R.drawable.mooshrooms),
+//                contentScale = ContentScale.Inside,
+//            )
+            .padding(start = 20.dp, top = 10.dp, end = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TextFieldComponent(
             currentValue = newName,
@@ -129,26 +135,30 @@ private fun Buttons(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
-            modifier = Modifier.clip(shape = CircleShape)
-                .background(color = MaterialTheme.colorScheme.secondaryContainer)
-                .padding(start = 4.dp, end = 4.dp)
+
         ) {
-            ElevatedButtonComponent(
+            GradientButtonComponent(
                 onClick = {
                     onCancelClicked()
                 },
                 iconVector = Icons.Outlined.Close,
                 text = "Cancel",
-                containerColor = MaterialTheme.colorScheme.primaryContainer
+                gradientColors = listOf(
+                    MaterialTheme.colorScheme.primary,
+                    MaterialTheme.colorScheme.primaryContainer
+                )
             )
             Spacer(modifier = Modifier.width(4.dp))
-            ElevatedButtonComponent(
+            GradientButtonComponent(
                 onClick = {
                     onSaveClicked()
                 },
                 iconVector = Icons.Outlined.Check,
                 text = "Save",
-                containerColor = MaterialTheme.colorScheme.primaryContainer
+                gradientColors = listOf(
+                    MaterialTheme.colorScheme.primaryContainer,
+                    MaterialTheme.colorScheme.primary
+                )
             )
         }
     }

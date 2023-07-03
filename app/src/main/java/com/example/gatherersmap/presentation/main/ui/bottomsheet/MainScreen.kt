@@ -1,5 +1,6 @@
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
+import android.util.Log
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
@@ -9,13 +10,18 @@ import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gatherersmap.data.ItemSpotDatabase
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.navigation.BottomSheetScreenState
+import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.map.MapEvent
 import com.example.gatherersmap.presentation.main.ui.map.MapScreen
 import com.example.gatherersmap.presentation.main.vm.MapViewModel
@@ -38,12 +44,11 @@ fun MainScreen() {
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberBottomSheetState(BottomSheetValue.Collapsed)
     )
-    val itemsState = viewModel.itemsState.collectAsState()
     val sheetScreenState =
         viewModel.sheetState.collectAsState(BottomSheetScreenState.Initial)
-    val tempSpotState = viewModel.temporalMarker.collectAsState()
     val snackBarHostState = scaffoldState.snackbarHostState
     val coroutineScope = rememberCoroutineScope()
+    var isFabClicked by remember { mutableStateOf(false) }
 
     BottomSheetScaffold(
         modifier = Modifier,
@@ -56,95 +61,23 @@ fun MainScreen() {
         sheetElevation = 20.dp,
         floatingActionButton = {
             MyLocation(
-                snackBarHostState = snackBarHostState
+                snackBarHostState = snackBarHostState,
+                isFabClicked = {
+                    isFabClicked = it
+                    Log.d(TAG, "fab clicked $it")
+                }
             )
         },
         floatingActionButtonPosition = FabPosition.End,
         sheetContent = {
-            when (val currentSheetState = sheetScreenState.value) {
-                // TODO: добавить анимацию перехода с детейл стейта на эдит при лонгклике
-                is BottomSheetScreenState.Add -> {
-                    currentSheetState.showSheet(
-                        scope = coroutineScope,
-                        scaffoldState = scaffoldState
-                    )
-                    EditDetailsSheetContent(
-                        itemSpot = currentSheetState.itemSpot,
-                        onCancelClicked = {
-                            viewModel.onEvent(MapEvent.Initial)
-                            currentSheetState.hideSheet(
-                                scope = coroutineScope,
-                                scaffoldState = scaffoldState
-                            )
-                        },
-                        onSaveClicked = { itemSpot ->
-                            viewModel.insertItemSpot(itemSpot)
-                            currentSheetState.hideSheet(
-                                scope = coroutineScope,
-                                scaffoldState = scaffoldState
-                            )
-                            viewModel.onEvent(MapEvent.Initial)
-                        }
-                    )
-                }
-
-                is BottomSheetScreenState.Details -> {
-                    currentSheetState.showSheet(
-                        scope = coroutineScope,
-                        scaffoldState = scaffoldState
-                    )
-                    DetailsSheetContent(
-                        itemSpot = currentSheetState.itemSpot,
-                        onEditClickListener = {
-                            viewModel.onEvent(MapEvent.OnEditItemClick(it))
-                            currentSheetState.hideSheet(
-                                scope = coroutineScope,
-                                scaffoldState = scaffoldState
-                            )
-                        },
-                        onDeleteClickListener = {
-                            viewModel.onEvent(MapEvent.OnDeleteItemClick(it))
-                            currentSheetState.hideSheet(
-                                scope = coroutineScope,
-                                scaffoldState = scaffoldState
-                            )
-                        }
-                    )
-                }
-
-                is BottomSheetScreenState.Edit -> {
-                    currentSheetState.showSheet(
-                        scope = coroutineScope,
-                        scaffoldState = scaffoldState
-                    )
-                    EditDetailsSheetContent(
-                        itemSpot = currentSheetState.itemSpot,
-                        onCancelClicked = {
-                            viewModel.onEvent(MapEvent.OnDetailsItemClick(it))
-                            currentSheetState.hideSheet(
-                                scope = coroutineScope,
-                                scaffoldState = scaffoldState
-                            )
-                        },
-                        onSaveClicked = { itemSpot ->
-                            viewModel.updateItemSpot(itemSpot)
-                            currentSheetState.hideSheet(
-                                scope = coroutineScope,
-                                scaffoldState = scaffoldState
-                            )
-                            viewModel.onEvent(MapEvent.OnDetailsItemClick(itemSpot))
-                        }
-                    )
-                }
-
-                BottomSheetScreenState.Initial -> {
-                }
-            }
+            BottomSheetContent(
+                currentSheetState = sheetScreenState.value,
+                scaffoldState = scaffoldState,
+                coroutineScope = coroutineScope,
+            )
         }
     ) {
         MapScreen(
-            itemSpots = itemsState,
-            temporalSpot = tempSpotState,
             onMapClick = {
                 sheetScreenState.value.hideSheet(
                     scaffoldState = scaffoldState,
@@ -157,7 +90,8 @@ fun MainScreen() {
             },
             onMarkerClick = {
                 viewModel.onEvent(MapEvent.OnDetailsItemClick(it))
-            }
+            },
+            isFabClicked = isFabClicked
         )
     }
 }

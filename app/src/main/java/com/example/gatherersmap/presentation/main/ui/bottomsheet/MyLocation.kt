@@ -16,18 +16,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.gatherersmap.R
-import com.example.gatherersmap.data.datastore.DataStore
+import com.example.gatherersmap.data.datastore.DataStoreRepository
 import com.example.gatherersmap.presentation.permissionshandling.PermissionRequest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-
 
 @ExperimentalPermissionsApi
 @Composable
 fun MyLocation(
     snackBarHostState: SnackbarHostState,
+    isFabClicked: (Boolean) -> Unit,
 ) {
     var requestState by remember { mutableStateOf(false) }
-    val dataStoreManager = DataStore.getDataStore()
+    val dataStoreManager = DataStoreRepository.getDataStore()
     val hasInitialRequest =
         dataStoreManager.getPermissionRequestStatus()
             .collectAsState(true)
@@ -43,6 +43,7 @@ fun MyLocation(
     }
     FloatingActionButton(
         onClick = {
+            isFabClicked(true)
             requestState = true
         },
         shape = CircleShape,

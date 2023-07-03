@@ -2,7 +2,6 @@ package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -36,7 +34,7 @@ import coil.request.ImageRequest
 import com.example.gatherersmap.R
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.presentation.components.DeletingDialogComposable
-import com.example.gatherersmap.presentation.components.ElevatedButtonComponent
+import com.example.gatherersmap.presentation.components.GradientButtonComponent
 
 @Composable
 fun DetailsSheetContent(
@@ -88,9 +86,6 @@ private fun Buttons(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
-            modifier = Modifier.clip(shape = CircleShape)
-                .background(color = MaterialTheme.colorScheme.secondaryContainer)
-                .padding(start = 4.dp, end = 4.dp)
         ) {
             var showDialog by remember { mutableStateOf(false) }
             if (showDialog) {
@@ -101,22 +96,28 @@ private fun Buttons(
                     onClose = { showDialog = false }
                 )
             }
-            ElevatedButtonComponent(
+            GradientButtonComponent(
                 onClick = {
                     onEditClickListener()
                 },
                 iconVector = Icons.Outlined.Edit,
                 text = "Edit",
-                containerColor = MaterialTheme.colorScheme.primaryContainer
+                gradientColors = listOf(
+                    MaterialTheme.colorScheme.primary,
+                    MaterialTheme.colorScheme.primaryContainer
+                )
             )
             Spacer(modifier = Modifier.width(10.dp))
-            ElevatedButtonComponent(
+            GradientButtonComponent(
                 onClick = {
                     showDialog = true
                 },
                 iconVector = Icons.Outlined.Delete,
                 text = "Delete",
-                containerColor = MaterialTheme.colorScheme.primaryContainer
+                gradientColors = listOf(
+                    MaterialTheme.colorScheme.primaryContainer,
+                    MaterialTheme.colorScheme.primary
+                )
             )
         }
     }
