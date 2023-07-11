@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 fun AlertDialogComponent(
     title: String,
     description: String,
-    onClick: () -> Unit,
+    onClick: (Boolean) -> Unit,
     textButton: String
 ) {
     AlertDialog(
@@ -32,7 +32,7 @@ fun AlertDialogComponent(
         confirmButton = {
             Button(
                 onClick = {
-                    onClick()
+                    onClick(true)
                 }
             ) {
                 Text(text = textButton)

@@ -1,8 +1,7 @@
-@file:OptIn(ExperimentalPermissionsApi::class)
+@file:OptIn(ExperimentalPermissionsApi::class, ExperimentalPermissionsApi::class)
 
 package com.example.gatherersmap.presentation.main.ui.map
 
-import android.Manifest
 import android.location.Location
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,14 +18,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gatherersmap.domain.model.ItemSpot
-import com.example.gatherersmap.presentation.location.MapLocationClient
-import com.example.gatherersmap.presentation.location.hasLocationPermissions
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.sydney
 import com.example.gatherersmap.presentation.main.vm.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
-import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_ORANGE
 import com.google.android.gms.maps.model.CameraPosition
@@ -46,13 +42,12 @@ fun MapScreen(
     viewModel: MapViewModel = viewModel(),
     isFabClicked: Boolean,
 ) {
-    val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
-    PermissionLifecycleRequest(permissionState)
     val context = LocalContext.current
-    val permissionStatus = remember { mutableStateOf(context.hasLocationPermissions()) }
+//    val permissionStatus = remember { mutableStateOf(context.hasLocationPermissions()) }
     val itemsState by viewModel.itemsState.collectAsState()
     val tempMarkerFlow by viewModel.temporalMarker.collectAsState()
     val oldMarkersList: MutableList<Marker>? = null
+    val location = viewModel.locationUpdates.collectAsState()
     val cameraPositionState =
         rememberCameraPositionState()
 //    val uiSettings = remember { MapUiSettings(myLocationButtonEnabled = true) }
@@ -62,20 +57,16 @@ fun MapScreen(
         latitude = sydney.latitude
         longitude = sydney.longitude
     }
-    val locationFlow =
-        MapLocationClient(LocalContext.current).getLocationUpdates(1000)
-            .collectAsState(initialLocation)
-    Log.d(TAG, "permission status: ${permissionStatus.value}")
-    if (isFabClicked) {
-        properties.copy(isMyLocationEnabled = permissionStatus.value)
-        Log.d(TAG, "isFabClicked IF started")
-        cameraPositionState.position = CameraPosition.fromLatLngZoom(
-            LatLng(
-                locationFlow.value.latitude,
-                locationFlow.value.longitude
-            ), 6f
-        )
-    }
+//    val locationFlow =
+//        MapLocationClient(LocalContext.current).getLocationUpdates(1000)
+//            .collectAsState(initialLocation)
+//    Log.d(TAG, "permission status: ${permissionStatus.value}")
+    cameraPositionState.position = CameraPosition.fromLatLngZoom(
+        LatLng(
+            location.value?.latitude ?: initialLocation.latitude,
+            location.value?.longitude ?: initialLocation.longitude
+        ), 6f
+    )
 // TODO: При первом запуске приложения не устанавливается превью для первого маркера
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
@@ -126,14 +117,16 @@ fun MapScreen(
     }
 }
 
+
 @Composable
-fun PermissionLifecycleRequest(permissionState: PermissionState) {
+fun PermissionLifecycleRequest(permissionState: MultiplePermissionsState) {
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(key1 = lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_START -> {
-                    permissionState.launchPermissionRequest()
+                    if (!permissionState.shouldShowRationale)
+                        permissionState.launchMultiplePermissionRequest()
                 }
 
                 else -> {
