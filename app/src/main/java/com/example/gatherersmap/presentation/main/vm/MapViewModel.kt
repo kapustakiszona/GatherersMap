@@ -2,24 +2,15 @@ package com.example.gatherersmap.presentation.main.vm
 
 import android.location.Location
 import android.util.Log
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.domain.model.ItemSpot
-import com.example.gatherersmap.domain.model.LocationStateModel
 import com.example.gatherersmap.navigation.BottomSheetScreenState
-import com.example.gatherersmap.presentation.location.LocationState
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.map.MapEvent
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.accompanist.permissions.PermissionState
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.shouldShowRationale
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,8 +37,6 @@ class MapViewModel(
         MutableStateFlow(PermissionResult.INITIAL)
     val permissionResultState = _permissionResultState.asStateFlow()
 
-    //var locationState by mutableStateOf(LocationStateModel())
-
     private val _locationUpdates = MutableStateFlow<Location?>(null)
     val locationUpdates = _locationUpdates.asStateFlow()
 
@@ -57,6 +46,7 @@ class MapViewModel(
 
     fun updateLocations(location: Location) {
         _locationUpdates.value = location
+        Log.d(TAG, "updateLocations: location in WM is updating")
     }
 
     init {
@@ -82,26 +72,6 @@ class MapViewModel(
         }
     }
 
-    /**
-     *  Возможно эта функция и сам стейт не нужны и можно обращаться к Модели
-     *  и через иф элс вызывать диалоги
-     */
-//    @Composable
-//    fun OnLocationEvent() {
-//        when {
-//            !locationState.gpsStatus -> {
-//                Log.e(TAG, "GPS is disabled")
-//            }
-//
-//            !locationState.networkStatus -> {
-//                Log.e(TAG, "NETWORK is disabled")
-//            }
-//
-//            locationState.gpsStatus and locationState.networkStatus -> {
-//                Log.d(TAG, "Location can be showed")
-//            }
-//        }
-//    }
 
     fun onEvent(event: MapEvent) {
         when (event) {

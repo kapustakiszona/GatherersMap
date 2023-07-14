@@ -61,6 +61,7 @@ fun MapScreen(
 //        MapLocationClient(LocalContext.current).getLocationUpdates(1000)
 //            .collectAsState(initialLocation)
 //    Log.d(TAG, "permission status: ${permissionStatus.value}")
+    // TODO: по клику на фаб сохранять последнее значение из флоу в переменную и передавать ее в камервпосишн
     cameraPositionState.position = CameraPosition.fromLatLngZoom(
         LatLng(
             location.value?.latitude ?: initialLocation.latitude,
