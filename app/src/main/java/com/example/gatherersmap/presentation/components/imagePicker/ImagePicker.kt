@@ -8,7 +8,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,11 +17,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import com.example.gatherersmap.R
-import com.example.gatherersmap.presentation.components.ElevatedButtonComponent
+import com.example.gatherersmap.presentation.components.VanishingButtonComponent
 
 @Composable
 fun ImagePicker(
-    onImagePick: (String) -> Unit
+    onImagePick: (String) -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -50,7 +49,7 @@ fun ImagePicker(
 
 
     Column {
-        ElevatedButtonComponent(
+        VanishingButtonComponent(
             onClick = {
                 hasCameraImage = false
                 val uri = ComposeFileProvider.getImageUri(context)
@@ -60,9 +59,8 @@ fun ImagePicker(
             },
             iconVector = ImageVector.vectorResource(R.drawable.add_photo),
             text = "Add photo",
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
-        ElevatedButtonComponent(
+        VanishingButtonComponent(
             onClick = {
                 hasImage = false
                 photoPicker.launch(
@@ -73,7 +71,6 @@ fun ImagePicker(
             },
             iconVector = Icons.Outlined.Add,
             text = "Images",
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
         if (hasImage && imageUri != null) {
             val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
