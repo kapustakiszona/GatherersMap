@@ -1,4 +1,4 @@
-package com.example.gatherersmap
+package com.example.gatherersmap.presentation.main.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,26 +7,31 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.gatherersmap.presentation.ui.BottomSheet
-import com.example.gatherersmap.ui.theme.GatherersMapTheme
+import com.example.gatherersmap.presentation.main.ui.bottomsheet.MainScreen
+import com.example.gatherersmap.theme.AppTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.android.gms.maps.model.LatLng
 
 class MainActivity : ComponentActivity() {
-
-
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            GatherersMapTheme {
-                // A surface container using the 'background' color from the theme
+            AppTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
-                    BottomSheet()
+                    MainScreen()
                 }
             }
         }
     }
+
+    companion object {
+        const val TAG = "OTAG"
+        val sydney = LatLng(-33.865143, 151.209900)
+    }
+
 }
 

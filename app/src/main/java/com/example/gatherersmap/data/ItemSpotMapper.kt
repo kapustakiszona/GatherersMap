@@ -8,7 +8,8 @@ fun ItemSpotEntity.toItemSpot(): ItemSpot {
         lng = lng,
         id = id,
         name = name ?: "",
-        description = description ?: ""
+        description = description ?: "",
+        image = image
     )
 }
 
@@ -18,6 +19,7 @@ fun ItemSpot.toItemSpotEntity(): ItemSpotEntity {
         lng = lng,
         id = id,
         name = name,
-        description = description
+        description = description,
+        image = image
     )
 }

@@ -29,13 +29,4 @@ class ItemSpotRepositoryImpl(
             }
         }
     }
-
-    override suspend fun updateItemSpot(lat: Double, lng: Double, description: String, name: String) {
-        dao.updateItemSpot(
-            lat = lat,
-            lng = lng,
-            description = description,
-            name = name
-        )
-    }
 }

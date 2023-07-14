@@ -6,25 +6,30 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
-import com.example.gatherersmap.domain.model.ItemSpot
 
 @Composable
 fun TextFieldComponent(
-    newValue: MutableState<String>,
-    modifiedItem: ItemSpot,
+    currentValue : String,
+    modifiedValue: (String) -> Unit,
     label: String
-){
+) {
+    var newValue by remember {
+        mutableStateOf(currentValue)
+    }
     val focusManager = LocalFocusManager.current
     OutlinedTextField(
-        value = newValue.value,
+        value = newValue,
         onValueChange = { text ->
-            newValue.value = text
-            modifiedItem.name = newValue.value
+            newValue = text
+            modifiedValue(newValue)
         },
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Done,

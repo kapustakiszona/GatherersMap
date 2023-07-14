@@ -7,7 +7,7 @@ import com.example.gatherersmap.MapApp
 
 @Database(
     entities = [ItemSpotEntity::class],
-    version = 3
+    version = 5
 )
 abstract class ItemSpotDatabase : RoomDatabase() {
     abstract val dao: ItemSpotDao
