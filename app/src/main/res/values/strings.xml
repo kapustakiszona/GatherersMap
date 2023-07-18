@@ -5,4 +5,6 @@
     <string name="title_premission_denied_dialog">Permissions have not been obtained</string>
     <string name="description_permission_denied_dialog">This app can work better if you give it the necessary permissions</string>
     <string name="button_permission_denied_dialog">Start without full functionality</string>
+    <string name="settings_location_title">Turn on Location</string>
+    <string name="settings_location_description">Give location permissions, enable gps and network</string>
 </resources>

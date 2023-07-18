@@ -64,7 +64,7 @@ fun MyLocation(
             .filter { it.status.isGranted }
             .map { it.permission })
     }
-    PermissionLifecycleRequest(permissionState = permissionState)
+  //  PermissionLifecycleRequest(permissionState = permissionState)
     FloatingActionButton(
         onClick = {
             viewModel.permissionHandler(permissionState)
@@ -82,16 +82,7 @@ fun MyLocation(
     )
     when (state) {
         PermissionResult.PERMISSION_GRANTED -> {
-//            if (requestState) {
-            LocationUpdates(
-                usePreciseLocation = allRequiredPermissionsGranted.contains(Manifest.permission.ACCESS_FINE_LOCATION),
-                requestStateUpdate = {
-                    requestState = it
-                },
-                request = requestState
-            )
-//            }
-            Log.d(TAG, "PERMISSION_GRANTED requeststate : $requestState")
+
         }
 
         PermissionResult.PERMISSION_RATIONALE -> {

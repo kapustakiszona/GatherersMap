@@ -59,16 +59,6 @@ fun MainScreen() {
         ),
         sheetPeekHeight = 0.dp,
         sheetElevation = 20.dp,
-        floatingActionButton = {
-            MyLocation(
-                snackBarHostState = snackBarHostState,
-                isFabClicked = {
-                    isFabClicked = it
-                    Log.d(TAG, "fab clicked $it")
-                }
-            )
-        },
-        floatingActionButtonPosition = FabPosition.End,
         sheetContent = {
             BottomSheetContent(
                 currentSheetState = sheetScreenState.value,
@@ -91,7 +81,7 @@ fun MainScreen() {
             onMarkerClick = {
                 viewModel.onEvent(MapEvent.OnDetailsItemClick(it))
             },
-            isFabClicked = isFabClicked
+            scaffoldState = scaffoldState
         )
     }
 }

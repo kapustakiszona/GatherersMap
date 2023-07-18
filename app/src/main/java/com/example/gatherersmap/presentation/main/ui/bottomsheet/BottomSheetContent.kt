@@ -1,9 +1,11 @@
-@file:OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialApi::class)
+@file:OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialApi::class,
+    ExperimentalMaterialApi::class
+)
 
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.BottomSheetScaffoldState
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gatherersmap.navigation.BottomSheetScreenState
@@ -96,5 +98,6 @@ fun BottomSheetContent(
 
         BottomSheetScreenState.Initial -> {
         }
+
     }
 }
