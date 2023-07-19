@@ -6,6 +6,7 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomSheetScaffoldState
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.OutlinedButton
@@ -26,7 +26,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,24 +38,36 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gatherersmap.R
 import com.example.gatherersmap.presentation.components.AnimatedDialog
-import com.example.gatherersmap.presentation.main.vm.MapViewModel
-import com.example.gatherersmap.presentation.permissionshandling.PermissionHandling
+import com.example.gatherersmap.presentation.location.locationService
+import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
+@Preview
+@Composable
+fun PrevSet() {
+    SettingsCurrentPermissionState(
+        modifier = Modifier.background(
+            color = Color.Red.copy(
+                alpha = 0.1f
+            )
+        )
+    )
+}
 
 @Composable
 fun SettingsDialogContent(
-    viewModel: MapViewModel = viewModel(),
-    bottomSheetScaffoldState: BottomSheetScaffoldState,
+    //  viewModel: MapViewModel = viewModel(),
     onCancelClick: () -> Unit,
 ) {
+    //стейт должен прилетать из вм и зависеть от вкл\выкл gps
     var locationItemEnabledState by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     AnimatedDialog(
         onDismissRequest = onCancelClick,
     ) {
@@ -70,8 +81,7 @@ fun SettingsDialogContent(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(text = "Settings", style = TextStyle(fontSize = 22.sp))
-                Divider(modifier = Modifier.fillMaxWidth())
-                val permissionStatus by viewModel.permissionResultState.collectAsState()
+                Divider(modifier = Modifier.fillMaxWidth().padding(top = 5.dp, bottom = 5.dp))
                 val permissionState =
                     rememberMultiplePermissionsState(
                         listOf(
@@ -80,13 +90,8 @@ fun SettingsDialogContent(
                         )
                     )
                 if (locationItemEnabledState) {
-                    viewModel.permissionHandler(permissionState)
-                    PermissionHandling(
-                        permissionsStatus = permissionStatus,
-                        onRequested = {
-                        },
-                        snackBarHostState = bottomSheetScaffoldState.snackbarHostState
-                    )
+                    Log.d(TAG, "SettingsDialogContent: switch ON")
+                    locationService(context){}
                 }
                 if (!permissionState.allPermissionsGranted) {
                     SettingsCurrentPermissionState(
@@ -147,7 +152,7 @@ fun SettingsCurrentPermissionState(
         OutlinedButton(
             onClick = { context.startActivity(intent) },
             contentPadding = ButtonDefaults.ContentPadding,
-            shape = RoundedCornerShape(20.dp)
+            shape = RoundedCornerShape(20.dp),
         ) {
             Text(text = "Enable")
         }

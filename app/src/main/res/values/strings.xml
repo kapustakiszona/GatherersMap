@@ -2,9 +2,12 @@
     <string name="app_name">GatherersMap</string>
     <string name="description_ask_permission_dialog">Embark on a journey with Gatherers Map, the app that allows you to mark and track your mushroom findings. Explore the world without losing your way and effortlessly keep track of your current location.\n\n Grant this app a permission to proceed. If you encounter any issues, you can manually enable it from the settings.</string>
     <string name="title_ask_permission_dialog">Turn On Location Service</string>
-    <string name="title_premission_denied_dialog">Permissions have not been obtained</string>
+    <string name="title_permission_denied_dialog">Permissions have not been obtained</string>
     <string name="description_permission_denied_dialog">This app can work better if you give it the necessary permissions</string>
     <string name="button_permission_denied_dialog">Start without full functionality</string>
-    <string name="settings_location_title">Turn on Location</string>
+    <string name="settings_location_title">Location access</string>
     <string name="settings_location_description">Give location permissions, enable gps and network</string>
+    <string name="permission_dialog_title">Permission Request</string>
+    <string name="permission_dialog_description">To track your location on the map and use the full functionality, you must give permission</string>
+    <string name="permissions_dialog_button">Give Permissions</string>
 </resources>

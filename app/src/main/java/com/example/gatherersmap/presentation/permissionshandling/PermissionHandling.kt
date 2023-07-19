@@ -3,28 +3,20 @@
 package com.example.gatherersmap.presentation.permissionshandling
 
 import android.Manifest
-import android.util.Log
-import androidx.compose.material.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.example.gatherersmap.R
 import com.example.gatherersmap.data.datastore.DataStoreRepository
 import com.example.gatherersmap.presentation.components.AlertDialogComponent
-import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
-import com.example.gatherersmap.presentation.main.vm.PermissionResult
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 @Composable
 fun PermissionHandling(
-    permissionsStatus: PermissionResult,
-    //  requestState: Boolean,
-    onRequested: (Boolean) -> Unit = {},
-    snackBarHostState: SnackbarHostState,
+    isAllGranted: (Boolean) -> Unit = {},
 ) {
-    Log.d(TAG, "PermissionHandling: Started")
-    Log.d(TAG, "PermissionHandling: $permissionsStatus")
     val permissionState =
         rememberMultiplePermissionsState(
             listOf(
@@ -36,22 +28,20 @@ fun PermissionHandling(
     val hasInitialRequest =
         dataStoreManager.getPermissionRequestStatus()
             .collectAsState(true)
-    val context = LocalContext.current
 
     if (permissionState.allPermissionsGranted) {
-        Log.d(TAG, "PermissionHandling: granted")
+        isAllGranted(true)
     } else {
         if (!permissionState.shouldShowRationale) {
             when {
                 !hasInitialRequest.value -> {
                     LaunchedEffect(key1 = true) {
                         permissionState.launchMultiplePermissionRequest()
-                        Log.d(TAG, "PERMISSION_DENIED  return requeststate false")
-                        onRequested(false)
                     }
                 }
 
                 hasInitialRequest.value -> {
+                    //Call if permissions are disabled and rationale was showed
                 }
             }
         } else {
@@ -61,86 +51,13 @@ fun PermissionHandling(
                 )
             }
             AlertDialogComponent(
-                title = "Permission Request",
-                description = "To track your location on the map and use the full functionality, you must give permission",
+                title = stringResource(R.string.permission_dialog_title),
+                description = stringResource(R.string.permission_dialog_description),
                 onClick = {
                     permissionState.launchMultiplePermissionRequest()
-                    Log.d(TAG, "PERMISSION_RATIONALE  return requeststate false")
-                    onRequested(false)
                 },
-                textButton = "Give Permission"
+                textButton = stringResource(R.string.permissions_dialog_button)
             )
         }
     }
-//    when (permissionsStatus) {
-//        PermissionResult.PERMISSION_GRANTED -> {
-//            Log.d(TAG, "PermissionHandling: granted")
-//        }
-//
-//        PermissionResult.PERMISSION_RATIONALE -> {
-//            LaunchedEffect(key1 = true) {
-//                dataStoreManager.savePermissionRequestStatus(
-//                    hasInitialRequest = true
-//                )
-//            }
-//            //          if (requestState)
-//            AlertDialogComponent(
-//                title = "Permission Request",
-//                description = "To track your location on the map and use the full functionality, you must give permission",
-//                onClick = {
-//                    permissionState.launchMultiplePermissionRequest()
-//                    Log.d(TAG, "PERMISSION_RATIONALE  return requeststate false")
-//                    onRequested(false)
-//                },
-//                textButton = "Give Permission"
-//            )
-//        }
-//
-//        PermissionResult.PERMISSION_DENIED -> {
-//            when {
-//                // requestState &&
-//                !hasInitialRequest.value -> {
-//                    LaunchedEffect(key1 = true) {
-//                        permissionState.launchMultiplePermissionRequest()
-//                        Log.d(TAG, "PERMISSION_DENIED  return requeststate false")
-//                        onRequested(false)
-//                    }
-//                }
-//
-//                // requestState &&
-//                hasInitialRequest.value -> {
-//                    val intent = Intent(
-//                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-//                        Uri.fromParts(
-//                            "package",
-//                            context.packageName,
-//                            null
-//                        )
-//                    )
-//                    SnackBarComponent(
-//                        snackBarHostState = snackBarHostState,
-//                        message = "Permission required",
-//                        textButton = "Go to settings",
-//                        intent = intent,
-//                        onSnackBarDismissed = {
-//                            Log.d(
-//                                TAG,
-//                                "SnackBarComponent dismiss return requeststate false"
-//                            )
-//                            onRequested(false)
-//                        },
-//                        onSnackBarActionPerformed = {
-//                            Log.d(
-//                                TAG,
-//                                "SnackBarComponent OK return requeststate false"
-//                            )
-//                            onRequested(false)
-//                        }
-//                    )
-//                }
-//            }
-//        }
-//
-//        PermissionResult.INITIAL -> {}
-//    }
 }
