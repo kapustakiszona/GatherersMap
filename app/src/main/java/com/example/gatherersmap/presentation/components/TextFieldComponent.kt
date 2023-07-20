@@ -17,9 +17,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun TextFieldComponent(
-    currentValue : String,
+    currentValue: String,
     modifiedValue: (String) -> Unit,
-    label: String
+    label: String,
 ) {
     var newValue by remember {
         mutableStateOf(currentValue)

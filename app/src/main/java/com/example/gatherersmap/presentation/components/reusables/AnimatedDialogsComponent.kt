@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
-package com.example.gatherersmap.presentation.components
+package com.example.gatherersmap.presentation.components.reusables
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.AlertDialog
@@ -21,6 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -29,7 +31,33 @@ const val ANIMATION_TIME = 1000L
 const val DIALOG_BUILD_TIME = 300L
 
 @Composable
-fun AnimatedDialog(
+fun AnimatedEntryDialog(
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.Center,
+    content: @Composable () -> Unit,
+) {
+    val animatedTrigger = remember { mutableStateOf(false) }
+    LaunchedEffect(key1 = Unit) {
+        launch {
+            delay(DIALOG_BUILD_TIME)
+            animatedTrigger.value = true
+        }
+    }
+    Dialog(onDismissRequest = onDismissRequest) {
+        Box(
+            contentAlignment = contentAlignment,
+            modifier = modifier.fillMaxSize()
+        ) {
+            AnimatedScaleInTransition(visible = animatedTrigger.value) {
+                content()
+            }
+        }
+    }
+}
+
+@Composable
+fun AnimatedEntryExitDialog(
     onDismissRequest: () -> Unit,
     contentAlignment: Alignment = Alignment.Center,
     content: @Composable () -> Unit,
@@ -61,7 +89,7 @@ fun AnimatedDialog(
     }
 }
 
-suspend fun startDismissWithExitAnimation(
+private suspend fun startDismissWithExitAnimation(
     animateTrigger: MutableState<Boolean>,
     onDismissRequest: () -> Unit,
 ) {

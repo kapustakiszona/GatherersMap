@@ -42,7 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gatherersmap.R
-import com.example.gatherersmap.presentation.components.AnimatedDialog
+import com.example.gatherersmap.presentation.components.reusables.AnimatedEntryExitDialog
 import com.example.gatherersmap.presentation.location.locationService
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -68,7 +68,7 @@ fun SettingsDialogContent(
     //стейт должен прилетать из вм и зависеть от вкл\выкл gps
     var locationItemEnabledState by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    AnimatedDialog(
+    AnimatedEntryExitDialog(
         onDismissRequest = onCancelClick,
     ) {
         Surface(
