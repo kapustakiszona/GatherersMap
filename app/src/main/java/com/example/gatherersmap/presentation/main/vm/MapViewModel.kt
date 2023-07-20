@@ -1,16 +1,11 @@
 package com.example.gatherersmap.presentation.main.vm
 
-import android.location.Location
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.navigation.BottomSheetScreenState
-import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.map.MapEvent
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPermissionsApi::class)
 class MapViewModel(
     private val repository: ItemSpotRepositoryImpl,
 ) : ViewModel() {
@@ -33,22 +27,6 @@ class MapViewModel(
     private val _temporalMarker = MutableStateFlow<LatLng?>(null)
     val temporalMarker = _temporalMarker.asStateFlow()
 
-    private val _permissionResultState =
-        MutableStateFlow(PermissionResult.INITIAL)
-    val permissionResultState = _permissionResultState.asStateFlow()
-
-    private val _locationUpdates = MutableStateFlow<Location?>(null)
-    val locationUpdates = _locationUpdates.asStateFlow()
-
-
-    // TODO: попробовать позвращать в функции созданные енамы, через которые в композабле вызывать нужные диалоги
-// TODO: rememberPermission не работает 
-
-    fun updateLocations(location: Location) {
-        _locationUpdates.value = location
-        Log.d(TAG, "updateLocations: location in WM is updating")
-    }
-
     init {
         viewModelScope.launch {
             repository.getItemSpots().collect {
@@ -56,22 +34,6 @@ class MapViewModel(
             }
         }
     }
-
-    fun permissionHandler(permissionState: MultiplePermissionsState) {
-        Log.d(TAG, "permissionState started / state: ${permissionState.revokedPermissions}")
-        _permissionResultState.update {
-            if (permissionState.allPermissionsGranted) {
-                PermissionResult.PERMISSION_GRANTED
-            } else {
-                if (!permissionState.shouldShowRationale) {
-                    PermissionResult.PERMISSION_DENIED
-                } else {
-                    PermissionResult.PERMISSION_RATIONALE
-                }
-            }
-        }
-    }
-
 
     fun onEvent(event: MapEvent) {
         when (event) {
@@ -159,8 +121,4 @@ class MapViewModel(
             null
         }
     }
-}
-
-enum class PermissionResult {
-    PERMISSION_GRANTED, PERMISSION_RATIONALE, PERMISSION_DENIED, INITIAL
 }

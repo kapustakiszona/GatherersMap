@@ -26,20 +26,32 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gatherersmap.R
 
+@Preview
+@Composable
+fun DialogPreview() {
+    CustomDialogComponent(
+        title = "title",
+        description = "description",
+        onCancelClick = {},
+        onOkClick = {})
+}
+
+
 @Composable
 fun CustomDialogComponent(
     title: String,
     description: String,
-    onCancelPermissionsClick: () -> Unit,
-    onEnablePermissionsClick: () -> Unit
+    onCancelClick: () -> Unit,
+    onOkClick: () -> Unit = {},
 ) {
     Dialog(
-        onDismissRequest = { onCancelPermissionsClick() }
+        onDismissRequest = { onCancelClick() }
     ) {
         Box(
             modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
@@ -97,7 +109,7 @@ fun CustomDialogComponent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 32.dp, end = 32.dp),
-                    onClick = onEnablePermissionsClick,
+                    onClick = onOkClick,
                     contentPadding = PaddingValues(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent
@@ -125,7 +137,7 @@ fun CustomDialogComponent(
                 //Button : Cancel button
                 TextButton(
                     onClick = {
-                        onCancelPermissionsClick()
+                        onCancelClick()
                     }
                 ) {
                     Text(
