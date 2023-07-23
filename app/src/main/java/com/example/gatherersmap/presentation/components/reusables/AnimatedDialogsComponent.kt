@@ -4,9 +4,12 @@ package com.example.gatherersmap.presentation.components.reusables
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.core.EaseInBounce
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -27,7 +30,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-const val ANIMATION_TIME = 1000L
+const val ANIMATION_TIME_HALF_SEC = 500L
+const val ANIMATION_TIME_ONE_SEC = 1000L
 const val DIALOG_BUILD_TIME = 300L
 
 @Composable
@@ -49,7 +53,10 @@ fun AnimatedEntryDialog(
             contentAlignment = contentAlignment,
             modifier = modifier.fillMaxSize()
         ) {
-            AnimatedScaleInTransition(visible = animatedTrigger.value) {
+            AnimatedScaleInTransition(
+                visible = animatedTrigger.value,
+                animateDuration = ANIMATION_TIME_ONE_SEC
+            ) {
                 content()
             }
         }
@@ -82,7 +89,10 @@ fun AnimatedEntryExitDialog(
             contentAlignment = contentAlignment,
             modifier = Modifier.size(350.dp)
         ) {
-            AnimatedScaleInTransition(visible = animatedTrigger.value) {
+            AnimatedScaleInTransition(
+                visible = animatedTrigger.value,
+                animateDuration = ANIMATION_TIME_ONE_SEC
+            ) {
                 content()
             }
         }
@@ -94,22 +104,46 @@ private suspend fun startDismissWithExitAnimation(
     onDismissRequest: () -> Unit,
 ) {
     animateTrigger.value = false
-    delay(ANIMATION_TIME)
+    delay(ANIMATION_TIME_ONE_SEC)
     onDismissRequest()
 }
 
 @Composable
-fun AnimatedScaleInTransition(
+fun AnimatedTransitionSample(
     visible: Boolean,
     content: @Composable AnimatedVisibilityScope.() -> Unit,
 ) {
     AnimatedVisibility(
         visible = visible,
+        enter = expandVertically(
+            animationSpec = tween(
+                1500,
+                easing = EaseInBounce
+            )
+        ),
+        exit = shrinkVertically(
+            animationSpec = tween(
+                1500,
+                easing = EaseInBounce
+            )
+        ),
+        content = content
+    )
+}
+
+@Composable
+fun AnimatedScaleInTransition(
+    visible: Boolean,
+    animateDuration: Long,
+    content: @Composable AnimatedVisibilityScope.() -> Unit,
+) {
+    AnimatedVisibility(
+        visible = visible,
         enter = scaleIn(
-            animationSpec = tween(ANIMATION_TIME.toInt())
+            animationSpec = tween(animateDuration.toInt())
         ),
         exit = scaleOut(
-            animationSpec = tween(ANIMATION_TIME.toInt())
+            animationSpec = tween(animateDuration.toInt())
         ),
         content = content
     )

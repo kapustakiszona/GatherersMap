@@ -52,11 +52,10 @@ fun MapScreen(
     val oldMarkersList: MutableList<Marker>? = null
     val cameraPositionState =
         rememberCameraPositionState()
-    var uiSettings by remember { mutableStateOf(MapUiSettings()) }
+    var uiSettings by remember { mutableStateOf(MapUiSettings(zoomControlsEnabled = false)) }
     var properties by remember { mutableStateOf(MapProperties()) }
     var isMapReady by remember { mutableStateOf(false) }
 
-// TODO: При первом запуске приложения не устанавливается превью для первого маркера
     Box(contentAlignment = Alignment.TopStart) {
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
@@ -96,21 +95,21 @@ fun MapScreen(
                     properties = properties.copy(isMyLocationEnabled = result)
                 })
             }
+            oldMarkersList?.forEach { oldMarker ->
+                oldMarker.remove()
+            }
+            tempMarkerFlow?.let { latLng ->
+                Log.d(TAG, "tempMark: $latLng")
+                MarkerInfoWindow(
+                    state = MarkerState(
+                        position = latLng
+                    ),
+                    icon = BitmapDescriptorFactory.defaultMarker(HUE_ORANGE)
+                ) { marker ->
+                    oldMarkersList.orEmpty().toMutableList().add(marker)
+                }
+            }
             itemsState.itemSpots.forEach { itemSpot ->
-                oldMarkersList?.forEach { oldMarker ->
-                    oldMarker.remove()
-                }
-                tempMarkerFlow?.let { latLng ->
-                    Log.d(TAG, "tempMark: $latLng")
-                    MarkerInfoWindow(
-                        state = MarkerState(
-                            position = latLng
-                        ),
-                        icon = BitmapDescriptorFactory.defaultMarker(HUE_ORANGE)
-                    ) { marker ->
-                        oldMarkersList.orEmpty().toMutableList().add(marker)
-                    }
-                }
                 MarkerInfoWindow(
                     state = MarkerState(
                         position = LatLng(

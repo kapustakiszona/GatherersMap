@@ -2,13 +2,12 @@ package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,11 +25,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -40,6 +39,16 @@ import com.example.gatherersmap.presentation.components.GradientButtonComponent
 import com.example.gatherersmap.presentation.components.TextFieldComponent
 import com.example.gatherersmap.presentation.components.imagePicker.ImagePicker
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
+
+@Preview(showBackground = true)
+@Composable
+fun PrevEdit() {
+    EditDetailsSheetContent(
+        itemSpot = ItemSpot(0.0, 0.0),
+        onCancelClicked = {},
+        onSaveClicked = {}
+    )
+}
 
 @Composable
 fun EditDetailsSheetContent(
@@ -64,13 +73,13 @@ fun EditDetailsSheetContent(
 
 
     Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
 //            .paint(
 //                painter = painterResource(R.drawable.mooshrooms),
-//                contentScale = ContentScale.Inside,
-//            )
-            .padding(start = 20.dp, top = 10.dp, end = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+//                contentScale = ContentScale.FillBounds,
+//            ),
     ) {
         TextFieldComponent(
             currentValue = newName,
@@ -88,7 +97,6 @@ fun EditDetailsSheetContent(
             },
             label = "Description"
         )
-        Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier
                 .border(
@@ -111,7 +119,6 @@ fun EditDetailsSheetContent(
                 contentScale = ContentScale.FillBounds
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
         Buttons(
             onSaveClicked = {
                 modifiedItem.image = tempImage
@@ -134,9 +141,7 @@ private fun Buttons(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-
-        ) {
+        Row {
             GradientButtonComponent(
                 onClick = {
                     onCancelClicked()
