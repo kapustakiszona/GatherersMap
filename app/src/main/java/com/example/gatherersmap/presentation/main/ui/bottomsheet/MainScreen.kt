@@ -4,10 +4,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FabPosition
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -15,6 +17,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gatherersmap.data.ItemSpotDatabase
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.navigation.BottomSheetScreenState
+import com.example.gatherersmap.presentation.main.ui.PickLocationFab
 import com.example.gatherersmap.presentation.main.ui.map.MapEvent
 import com.example.gatherersmap.presentation.main.ui.map.MapScreen
 import com.example.gatherersmap.presentation.main.vm.MapViewModel
@@ -37,8 +40,7 @@ fun MainScreen() {
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberBottomSheetState(BottomSheetValue.Collapsed)
     )
-    val sheetScreenState =
-        viewModel.sheetState.collectAsState(BottomSheetScreenState.Initial)
+    val sheetScreenState by viewModel.sheetState.collectAsState(BottomSheetScreenState.Initial)
     val coroutineScope = rememberCoroutineScope()
 
     BottomSheetScaffold(
@@ -52,22 +54,26 @@ fun MainScreen() {
         sheetElevation = 20.dp,
         sheetContent = {
             BottomSheetContent(
-                currentSheetState = sheetScreenState.value,
+                currentSheetState = sheetScreenState,
                 scaffoldState = scaffoldState,
                 coroutineScope = coroutineScope,
             )
+        },
+        floatingActionButtonPosition = FabPosition.Center,
+        floatingActionButton = {
+            PickLocationFab(currentSheetState = sheetScreenState)
         }
     ) {
         MapScreen(
             onMapClick = {
-                sheetScreenState.value.hideSheet(
+                sheetScreenState.hideSheet(
                     scaffoldState = scaffoldState,
                     scope = coroutineScope
                 )
                 viewModel.onEvent(MapEvent.Initial)
             },
             onAddMarkerLongClick = {
-                viewModel.onEvent(MapEvent.OnAddItemLongClick(it))
+                viewModel.onEvent(MapEvent.OnAddItemClick(it))
             },
             onMarkerClick = {
                 viewModel.onEvent(MapEvent.OnDetailsItemClick(it))

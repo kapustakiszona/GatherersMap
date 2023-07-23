@@ -1,10 +1,12 @@
 package com.example.gatherersmap.presentation.main.vm
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.navigation.BottomSheetScreenState
+import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.map.MapEvent
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
@@ -39,6 +41,7 @@ class MapViewModel(
         when (event) {
 
             is MapEvent.Initial -> {
+                Log.d(TAG, "onEvent: Initial State")
                 removeTemporalMarker()
                 setDefaultSheetState()
             }
@@ -52,7 +55,7 @@ class MapViewModel(
                 )
             }
 
-            is MapEvent.OnAddItemLongClick -> {
+            is MapEvent.OnAddItemClick -> {
                 _temporalMarker.update {
                     event.latLng
                 }
@@ -117,6 +120,7 @@ class MapViewModel(
     }
 
     private fun removeTemporalMarker() {
+        Log.d(TAG, "removeTemporalMarker: tempMarker is null")
         _temporalMarker.update {
             null
         }

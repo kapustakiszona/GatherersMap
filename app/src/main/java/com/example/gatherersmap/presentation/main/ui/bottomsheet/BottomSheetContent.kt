@@ -1,5 +1,5 @@
 @file:OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialApi::class,
-    ExperimentalMaterialApi::class
+    ExperimentalMaterialApi::class, ExperimentalMaterialApi::class
 )
 
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
@@ -67,6 +67,7 @@ fun BottomSheetContent(
                         scope = coroutineScope,
                         scaffoldState = scaffoldState
                     )
+                    viewModel.onEvent(MapEvent.Initial)
                 }
             )
         }
