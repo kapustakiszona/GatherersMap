@@ -14,8 +14,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.gatherersmap.data.ItemSpotDatabase
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
+import com.example.gatherersmap.data.localdb.ItemSpotDatabase
+import com.example.gatherersmap.data.network.ApiFactory
+import com.example.gatherersmap.data.network.MushroomApi
 import com.example.gatherersmap.navigation.BottomSheetScreenState
 import com.example.gatherersmap.presentation.main.ui.PickLocationFab
 import com.example.gatherersmap.presentation.main.ui.map.MapEvent
@@ -33,7 +35,8 @@ fun MainScreen() {
         viewModel(
             factory = MapViewModelFactory(
                 ItemSpotRepositoryImpl(
-                    ItemSpotDatabase
+                    localDataSource = ItemSpotDatabase.getDatabase(),
+                    remoteDataSource = MushroomApi(ApiFactory.mushroomService)
                 )
             )
         )

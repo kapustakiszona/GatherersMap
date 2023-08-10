@@ -19,7 +19,8 @@ class ComposeFileProvider : FileProvider(
                 ".jpg",
                 directory
             )
-            val authority = context.packageName + ".presentation.components.imagePicker.ComposeFileProvider"
+            val authority =
+                context.packageName + ".presentation.components.imagePicker.ComposeFileProvider"
             return getUriForFile(context, authority, file)
         }
     }

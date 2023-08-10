@@ -8,10 +8,13 @@ import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.navigation.BottomSheetScreenState
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.map.MapEvent
+import com.example.gatherersmap.utils.NetworkResult
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -31,7 +34,8 @@ class MapViewModel(
 
     init {
         viewModelScope.launch {
-            repository.getItemSpots().collect {
+            repository.getAllItemSpotsRemote().collectLatest {
+                Log.d(TAG, "item Collect: ")
                 _itemsState.value = _itemsState.value.copy(itemSpots = it)
             }
         }
@@ -93,20 +97,36 @@ class MapViewModel(
     }
 
     fun insertItemSpot(itemSpot: ItemSpot) {
-        viewModelScope.launch {
-            repository.insertItemSpot(itemSpot)
+        viewModelScope.launch(Dispatchers.IO) {
+            when (val result = repository.insertItemSpotRemote(itemSpot)) {
+                is NetworkResult.Error -> {
+                    Log.d(TAG, "insertItemSpot: error : ${result.errorResponse}")
+                }
+
+                is NetworkResult.Success -> {
+                    Log.d(TAG, "insertItemSpot: success : ${result.data}")
+                }
+            }
         }
     }
 
     fun deleteItemSpot(itemSpot: ItemSpot) {
-        viewModelScope.launch {
-            repository.deleteItemSpot(itemSpot)
+        viewModelScope.launch(Dispatchers.IO) {
+            when (val result = repository.deleteItemSpotRemote(itemSpot)) {
+                is NetworkResult.Error -> {
+                    Log.d(TAG, "insertItemSpot: error : ${result.errorResponse}")
+                }
+
+                is NetworkResult.Success -> {
+                    Log.d(TAG, "insertItemSpot: success : ${result.data}")
+                }
+            }
         }
     }
 
     fun updateItemSpot(itemSpot: ItemSpot) {
-        viewModelScope.launch {
-            repository.insertItemSpot(itemSpot)
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.insertItemSpotRemote(itemSpot)
         }
     }
 
@@ -123,6 +143,12 @@ class MapViewModel(
         Log.d(TAG, "removeTemporalMarker: tempMarker is null")
         _temporalMarker.update {
             null
+        }
+    }
+
+    private fun getItemSpotRemote(itemSpot: ItemSpot) {
+        viewModelScope.launch {
+            repository.getItemSpotRemote(itemSpot)
         }
     }
 }

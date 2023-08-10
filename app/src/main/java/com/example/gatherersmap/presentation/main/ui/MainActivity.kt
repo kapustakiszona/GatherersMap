@@ -30,7 +30,6 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val TAG = "OTAG"
-        val sydney = LatLng(-33.865143, 151.209900)
     }
 
 }

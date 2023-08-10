@@ -1,4 +1,4 @@
-package com.example.gatherersmap.data
+package com.example.gatherersmap.data.localdb
 
 import androidx.room.Database
 import androidx.room.Room
