@@ -1,7 +1,6 @@
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,14 +29,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.gatherersmap.R
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.presentation.components.DeletingDialogComposable
 import com.example.gatherersmap.presentation.components.GradientButtonComponent
-import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 
 @Composable
 fun DetailsSheetContent(
@@ -45,21 +42,13 @@ fun DetailsSheetContent(
     onEditClickListener: (ItemSpot) -> Unit,
     onDeleteClickListener: (ItemSpot) -> Unit,
 ) {
-    val painter = if (itemSpot.image.orEmpty().contains(".png")) {
-        rememberAsyncImagePainter(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data("http://185.105.88.49:8080/mushroom/images/" + itemSpot.image)
-                .build(),
-            fallback = painterResource(R.drawable.image_placeholder)
-        )
-    } else {
-        rememberAsyncImagePainter(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(itemSpot.image)
-                .build(),
-            fallback = painterResource(R.drawable.image_placeholder)
-        )
-    }
+    val painter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(itemSpot.image)
+            .build(),
+        fallback = painterResource(R.drawable.image_placeholder)
+    )
+
     Column(
         modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp)
     ) {

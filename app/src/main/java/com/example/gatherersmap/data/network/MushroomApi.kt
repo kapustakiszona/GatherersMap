@@ -5,7 +5,8 @@ import com.example.gatherersmap.data.network.dto.MushroomDeleteResponseDto
 import com.example.gatherersmap.data.network.dto.MushroomGetResponseDto
 import com.example.gatherersmap.data.network.dto.MushroomsGetAllResponseDto
 import com.example.gatherersmap.data.network.mapper.toInsertMushroomDto
-import com.example.gatherersmap.data.network.mapper.toMushroomIdRequestDto
+import com.example.gatherersmap.data.network.mapper.toMushroomDeleteRequestDto
+import com.example.gatherersmap.data.network.mapper.toMushroomGetRequestDto
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.utils.NetworkResult
 import com.example.gatherersmap.utils.handleApi
@@ -14,7 +15,7 @@ class MushroomApi(
     private val apiService: MushroomService,
 ) {
     suspend fun getItemSpot(itemSpot: ItemSpot): NetworkResult<MushroomGetResponseDto> {
-        return handleApi { apiService.getItemSpot(spotId = itemSpot.toMushroomIdRequestDto()) }
+        return handleApi { apiService.getItemSpot(spotId = itemSpot.toMushroomGetRequestDto()) }
     }
 
     suspend fun getAllItemSpots(): NetworkResult<MushroomsGetAllResponseDto> {
@@ -26,7 +27,7 @@ class MushroomApi(
     }
 
     suspend fun deleteItemSpot(itemSpot: ItemSpot): NetworkResult<MushroomDeleteResponseDto> {
-        return handleApi { apiService.deleteItemSpot(spotId = itemSpot.toMushroomIdRequestDto()) }
+        return handleApi { apiService.deleteItemSpot(spotId = itemSpot.toMushroomDeleteRequestDto()) }
     }
 
 

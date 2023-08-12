@@ -25,15 +25,13 @@ class ItemSpotRepositoryImpl(
     private val dispatcherIO = Dispatchers.IO + coroutineExceptionHandler
 
     override suspend fun insertItemSpotRemote(spot: ItemSpot): NetworkResult<String> {
-        return withContext(dispatcherIO) {
-            when (val result = remoteDataSource.insertItemSpot(itemSpot = spot)) {
-                is NetworkResult.Error -> {
-                    NetworkResult.Error(result.errorResponse)
-                }
+        return when (val result = remoteDataSource.insertItemSpot(itemSpot = spot)) {
+            is NetworkResult.Error -> {
+                NetworkResult.Error(result.errorMessage)
+            }
 
-                is NetworkResult.Success -> {
-                    NetworkResult.Success(result.data.fileName)
-                }
+            is NetworkResult.Success -> {
+                NetworkResult.Success(result.data.fileName)
             }
         }
     }
@@ -44,15 +42,13 @@ class ItemSpotRepositoryImpl(
         }
 
     override suspend fun deleteItemSpotRemote(spot: ItemSpot): NetworkResult<Boolean> {
-        return withContext(dispatcherIO) {
-            when (val result = remoteDataSource.deleteItemSpot(spot)) {
-                is NetworkResult.Error -> {
-                    NetworkResult.Error(result.errorResponse)
-                }
+        return when (val result = remoteDataSource.deleteItemSpot(spot)) {
+            is NetworkResult.Error -> {
+                NetworkResult.Error(result.errorMessage)
+            }
 
-                is NetworkResult.Success -> {
-                    NetworkResult.Success(result.data.isSuccess!!)
-                }
+            is NetworkResult.Success -> {
+                NetworkResult.Success(result.data.isSuccess!!)
             }
         }
     }
@@ -87,7 +83,7 @@ class ItemSpotRepositoryImpl(
             }
 
             is NetworkResult.Error -> {
-                val error = result.errorResponse
+                val error = result.errorMessage
             }
 
         }

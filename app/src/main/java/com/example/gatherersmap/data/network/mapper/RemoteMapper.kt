@@ -3,12 +3,14 @@ package com.example.gatherersmap.data.network.mapper
 import android.net.Uri
 import com.example.gatherersmap.MapApp
 import com.example.gatherersmap.data.network.dto.MushroomAddRequestDto
-import com.example.gatherersmap.data.network.dto.MushroomIdRequestDto
+import com.example.gatherersmap.data.network.dto.MushroomDeleteRequestDto
+import com.example.gatherersmap.data.network.dto.MushroomGetRequestDto
 import com.example.gatherersmap.data.network.dto.MushroomResponseDto
 import com.example.gatherersmap.data.network.dto.MushroomsGetAllResponseDto
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.utils.toBase64
 
+const val BASE_IMAGE_URL = "http://185.105.88.49:8080/mushroom/images/"
 fun MushroomsGetAllResponseDto.toListItemSpots(): List<ItemSpot> {
     return mushrooms.map { it.toItemSpot() }
 }
@@ -20,11 +22,11 @@ fun MushroomResponseDto.toItemSpot(): ItemSpot {
         id = id,
         name = name,
         description = description,
-        image = image
+        image = BASE_IMAGE_URL + image
     )
 }
 
-private fun tryReadFile(image: String): String {
+private fun tryReadFile(image: String): String? {
     val contentResolver = MapApp.instance.contentResolver
     val androidUri = Uri.parse(image)
     try {
@@ -43,12 +45,19 @@ private fun tryReadFile(image: String): String {
             return bytes.toBase64()
         }
     } catch (e: Exception) {
-        throw e
+        e.printStackTrace()
+        return null
     }
 }
 
-fun ItemSpot.toMushroomIdRequestDto(): MushroomIdRequestDto {
-    return MushroomIdRequestDto(
+fun ItemSpot.toMushroomDeleteRequestDto(): MushroomDeleteRequestDto {
+    return MushroomDeleteRequestDto(
+        id = id.toLong()
+    )
+}
+
+fun ItemSpot.toMushroomGetRequestDto(): MushroomGetRequestDto {
+    return MushroomGetRequestDto(
         id = id.toLong()
     )
 }
@@ -56,7 +65,7 @@ fun ItemSpot.toMushroomIdRequestDto(): MushroomIdRequestDto {
 fun ItemSpot.toInsertMushroomDto(): MushroomAddRequestDto {
     return MushroomAddRequestDto(
         description = description,
-        image = tryReadFile(image.orEmpty()),
+        image = tryReadFile(image.orEmpty()) ?: "",
         lat = lat,
         lon = lng,
         name = name

@@ -3,8 +3,8 @@ package com.example.gatherersmap.presentation.main.vm
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.domain.model.ItemSpot
+import com.example.gatherersmap.domain.repository.ItemSpotRepository
 import com.example.gatherersmap.navigation.BottomSheetScreenState
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.map.MapEvent
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MapViewModel(
-    private val repository: ItemSpotRepositoryImpl,
+    private val repository: ItemSpotRepository,
 ) : ViewModel() {
 
     private val _sheetState =
@@ -32,10 +32,13 @@ class MapViewModel(
     private val _temporalMarker = MutableStateFlow<LatLng?>(null)
     val temporalMarker = _temporalMarker.asStateFlow()
 
+    private val _networkProgress = MutableStateFlow(false)
+    val networkProgress = _networkProgress.asStateFlow()
+
     init {
         viewModelScope.launch {
             repository.getAllItemSpotsRemote().collectLatest {
-                Log.d(TAG, "item Collect: ")
+                Log.d(TAG, "item Collect ")
                 _itemsState.value = _itemsState.value.copy(itemSpots = it)
             }
         }
@@ -100,7 +103,7 @@ class MapViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             when (val result = repository.insertItemSpotRemote(itemSpot)) {
                 is NetworkResult.Error -> {
-                    Log.d(TAG, "insertItemSpot: error : ${result.errorResponse}")
+                    Log.d(TAG, "insertItemSpot: error : ${result.errorMessage}")
                 }
 
                 is NetworkResult.Success -> {
@@ -114,7 +117,7 @@ class MapViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             when (val result = repository.deleteItemSpotRemote(itemSpot)) {
                 is NetworkResult.Error -> {
-                    Log.d(TAG, "insertItemSpot: error : ${result.errorResponse}")
+                    Log.d(TAG, "insertItemSpot: error : ${result.errorMessage}")
                 }
 
                 is NetworkResult.Success -> {
