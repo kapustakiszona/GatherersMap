@@ -1,12 +1,17 @@
 package com.example.gatherersmap.presentation.main.vm
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gatherersmap.data.ItemSpotRepositoryImpl
+import com.example.gatherersmap.data.network.mapper.toListItemSpots
 import com.example.gatherersmap.domain.model.ItemSpot
-import com.example.gatherersmap.domain.repository.ItemSpotRepository
 import com.example.gatherersmap.navigation.BottomSheetScreenState
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
+import com.example.gatherersmap.presentation.main.ui.bottomsheet.BottomSheetVisibility
 import com.example.gatherersmap.presentation.main.ui.map.MapEvent
 import com.example.gatherersmap.utils.NetworkResult
 import com.google.android.gms.maps.model.LatLng
@@ -19,7 +24,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MapViewModel(
-    private val repository: ItemSpotRepository,
+    private val repository: ItemSpotRepositoryImpl,
 ) : ViewModel() {
 
     private val _sheetState =
@@ -32,16 +37,26 @@ class MapViewModel(
     private val _temporalMarker = MutableStateFlow<LatLng?>(null)
     val temporalMarker = _temporalMarker.asStateFlow()
 
-    private val _networkProgress = MutableStateFlow(false)
-    val networkProgress = _networkProgress.asStateFlow()
+    private val _sheetVisibleState = MutableStateFlow(BottomSheetVisibility.INITIAL)
+    val sheetVisibleState = _sheetVisibleState.asStateFlow()
+
+    var insertLoading by mutableStateOf(false)
+    var getAllLoading by mutableStateOf(false)
+    var deleteLoading by mutableStateOf(false)
+    var updateLoading by mutableStateOf(false)
+
 
     init {
-        viewModelScope.launch {
-            repository.getAllItemSpotsRemote().collectLatest {
-                Log.d(TAG, "item Collect ")
-                _itemsState.value = _itemsState.value.copy(itemSpots = it)
-            }
+        getAllItemSpots()
+    }
+
+    fun setVisibilities(visibility: BottomSheetVisibility) {
+        when (visibility) {
+            BottomSheetVisibility.HIDE -> _sheetVisibleState.update { visibility }
+            BottomSheetVisibility.SHOW -> _sheetVisibleState.update { visibility }
+            BottomSheetVisibility.INITIAL -> {}
         }
+
     }
 
     fun onEvent(event: MapEvent) {
@@ -90,6 +105,7 @@ class MapViewModel(
             }
 
             is MapEvent.OnEditItemClick -> {
+                _sheetVisibleState.update { BottomSheetVisibility.SHOW }
                 _sheetState.update {
                     BottomSheetScreenState.Edit(
                         itemSpot = event.spot,
@@ -99,35 +115,70 @@ class MapViewModel(
         }
     }
 
+    fun getAllItemSpots() {
+        viewModelScope.launch {
+            getAllLoading = true
+            repository.getAllItemSpotsRemote()
+                .collectLatest { result ->
+                    when (result) {
+                        is NetworkResult.Error -> {
+                            _itemsState.update {
+                                it.copy(itemNetworkError = result.errorMessage)
+                            }
+                        }
+
+                        is NetworkResult.Success -> {
+                            _itemsState.update {
+                                it.copy(itemSpots = result.data.toListItemSpots())
+                            }
+                        }
+                    }
+                }
+            getAllLoading = false
+        }
+    }
+
     fun insertItemSpot(itemSpot: ItemSpot) {
         viewModelScope.launch(Dispatchers.IO) {
+            insertLoading = true
             when (val result = repository.insertItemSpotRemote(itemSpot)) {
                 is NetworkResult.Error -> {
-                    Log.d(TAG, "insertItemSpot: error : ${result.errorMessage}")
+                    _itemsState.value =
+                        _itemsState.value.copy(itemNetworkError = result.errorMessage)
                 }
 
                 is NetworkResult.Success -> {
-                    Log.d(TAG, "insertItemSpot: success : ${result.data}")
+                    val fileName = result.data.fileName
                 }
             }
+            insertLoading = false
+            _sheetVisibleState.update { BottomSheetVisibility.HIDE }
+            getAllItemSpots()
+            onEvent(MapEvent.Initial)
         }
     }
 
     fun deleteItemSpot(itemSpot: ItemSpot) {
         viewModelScope.launch(Dispatchers.IO) {
+            deleteLoading = true
             when (val result = repository.deleteItemSpotRemote(itemSpot)) {
                 is NetworkResult.Error -> {
-                    Log.d(TAG, "insertItemSpot: error : ${result.errorMessage}")
+                    _itemsState.value =
+                        _itemsState.value.copy(itemNetworkError = result.errorMessage)
                 }
 
                 is NetworkResult.Success -> {
-                    Log.d(TAG, "insertItemSpot: success : ${result.data}")
+                    val isSuccess = result.data.isSuccess
                 }
             }
+            deleteLoading = false
+            getAllItemSpots()
+            _sheetVisibleState.update { BottomSheetVisibility.HIDE }
+            onEvent(MapEvent.Initial)
         }
     }
 
-    fun updateItemSpot(itemSpot: ItemSpot) {
+    fun updateItemSpot(itemSpot: ItemSpot) {            //insert inside
         viewModelScope.launch(Dispatchers.IO) {
             repository.insertItemSpotRemote(itemSpot)
         }

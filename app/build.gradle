@@ -74,14 +74,14 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     //maps
-    implementation 'com.google.maps.android:maps-compose:2.11.2'
+    implementation 'com.google.maps.android:maps-compose:2.14.0'
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
     implementation 'com.google.android.libraries.places:places:3.2.0'
     implementation 'com.google.android.gms:play-services-location:21.0.1'
     //material
     implementation 'androidx.compose.material:material:1.5.0'
     // KTX for the Maps SDK for Android
-    implementation 'com.google.maps.android:maps-ktx:3.3.0'
+    implementation 'com.google.maps.android:maps-ktx:3.4.0'
     // KTX for the Maps SDK for Android Utility Library
     implementation 'com.google.maps.android:maps-utils-ktx:3.3.0'
     //lifecycle
@@ -98,6 +98,8 @@ dependencies {
     implementation 'io.coil-kt:coil-compose:2.4.0'
     //accompanist permissions
     implementation "com.google.accompanist:accompanist-permissions:0.31.3-beta"
+    //accompanist navigation
+    implementation "com.google.accompanist:accompanist-navigation-material:0.33.0-alpha"
     //DataStore preferences
     implementation 'androidx.datastore:datastore-preferences:1.0.0'
     //retrofit

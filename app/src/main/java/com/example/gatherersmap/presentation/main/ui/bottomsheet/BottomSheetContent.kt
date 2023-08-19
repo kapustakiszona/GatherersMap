@@ -1,11 +1,11 @@
-@file:OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialApi::class,
-    ExperimentalMaterialApi::class, ExperimentalMaterialApi::class
+@file:OptIn(
+    ExperimentalMaterial3Api::class
 )
 
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
-import androidx.compose.material.BottomSheetScaffoldState
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gatherersmap.navigation.BottomSheetScreenState
@@ -21,77 +21,46 @@ fun BottomSheetContent(
     viewModel: MapViewModel = viewModel(),
 ) {
     when (currentSheetState) {
-        // TODO: добавить анимацию перехода с детейл стейта на эдит при лонгклике
         is BottomSheetScreenState.Add -> {
-            currentSheetState.showSheet(
-                scope = coroutineScope,
-                scaffoldState = scaffoldState
-            )
+            viewModel.setVisibilities(BottomSheetVisibility.SHOW)
             EditDetailsSheetContent(
                 itemSpot = currentSheetState.itemSpot,
                 onCancelClicked = {
                     viewModel.onEvent(MapEvent.Initial)
-                    currentSheetState.hideSheet(
-                        scope = coroutineScope,
-                        scaffoldState = scaffoldState
-                    )
+                    viewModel.setVisibilities(BottomSheetVisibility.HIDE)
                 },
                 onSaveClicked = { itemSpot ->
                     viewModel.insertItemSpot(itemSpot)
-                    currentSheetState.hideSheet(
-                        scope = coroutineScope,
-                        scaffoldState = scaffoldState
-                    )
-                    viewModel.onEvent(MapEvent.Initial)
+                    viewModel.setVisibilities(BottomSheetVisibility.HIDE)
                 }
             )
         }
 
         is BottomSheetScreenState.Details -> {
-            currentSheetState.showSheet(
-                scope = coroutineScope,
-                scaffoldState = scaffoldState
-            )
+            viewModel.setVisibilities(BottomSheetVisibility.SHOW)
             DetailsSheetContent(
                 itemSpot = currentSheetState.itemSpot,
-                onEditClickListener = {
-                    viewModel.onEvent(MapEvent.OnEditItemClick(it))
-                    currentSheetState.hideSheet(
-                        scope = coroutineScope,
-                        scaffoldState = scaffoldState
-                    )
+                onEditClickListener = { itemSpot ->
+                    viewModel.setVisibilities(BottomSheetVisibility.HIDE)
+                    viewModel.onEvent(MapEvent.OnEditItemClick(itemSpot))
                 },
-                onDeleteClickListener = {
-                    viewModel.onEvent(MapEvent.OnDeleteItemClick(it))
-                    currentSheetState.hideSheet(
-                        scope = coroutineScope,
-                        scaffoldState = scaffoldState
-                    )
-                    viewModel.onEvent(MapEvent.Initial)
+                onDeleteClickListener = { itemSpot ->
+                    viewModel.onEvent(MapEvent.OnDeleteItemClick(itemSpot))
                 }
             )
         }
 
         is BottomSheetScreenState.Edit -> {
-            currentSheetState.showSheet(
-                scope = coroutineScope,
-                scaffoldState = scaffoldState
-            )
+            viewModel.setVisibilities(BottomSheetVisibility.SHOW)
             EditDetailsSheetContent(
                 itemSpot = currentSheetState.itemSpot,
-                onCancelClicked = {
-                    viewModel.onEvent(MapEvent.OnDetailsItemClick(it))
-                    currentSheetState.hideSheet(
-                        scope = coroutineScope,
-                        scaffoldState = scaffoldState
-                    )
+                onCancelClicked = { itemSpot ->
+                    viewModel.onEvent(MapEvent.OnDetailsItemClick(itemSpot))
+                    viewModel.setVisibilities(BottomSheetVisibility.HIDE)
                 },
                 onSaveClicked = { itemSpot ->
                     viewModel.updateItemSpot(itemSpot)
-                    currentSheetState.hideSheet(
-                        scope = coroutineScope,
-                        scaffoldState = scaffoldState
-                    )
+                    viewModel.setVisibilities(BottomSheetVisibility.HIDE)
                     viewModel.onEvent(MapEvent.OnDetailsItemClick(itemSpot))
                 }
             )

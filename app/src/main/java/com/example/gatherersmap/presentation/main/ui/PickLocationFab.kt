@@ -1,5 +1,6 @@
 package com.example.gatherersmap.presentation.main.ui
 
+import android.util.Log
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -12,9 +13,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gatherersmap.navigation.BottomSheetScreenState
-import com.example.gatherersmap.presentation.components.reusables.ANIMATION_TIME_HALF_SEC
+import com.example.gatherersmap.presentation.components.CircularProgressBarComponent
+import com.example.gatherersmap.presentation.components.reusables.ANIMATION_TIME_QTR_SEC
 import com.example.gatherersmap.presentation.components.reusables.AnimatedScaleInTransition
 import com.example.gatherersmap.presentation.location.locationService
+import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.map.MapEvent
 import com.example.gatherersmap.presentation.main.vm.MapViewModel
 import com.google.android.gms.maps.model.LatLng
@@ -24,29 +27,36 @@ fun PickLocationFab(
     modifier: Modifier = Modifier,
     viewModel: MapViewModel = viewModel(),
     currentSheetState: BottomSheetScreenState,
+    loadingState: Boolean
 ) {
     val context = LocalContext.current
     AnimatedScaleInTransition(
         visible = (currentSheetState == BottomSheetScreenState.Initial),
-        animateDuration = ANIMATION_TIME_HALF_SEC
+        animateDuration = ANIMATION_TIME_QTR_SEC
     ) {
-        ExtendedFloatingActionButton(
-            modifier = modifier,
-            text = { Text(text = "New mushroom") },
-            icon = { Icon(Icons.Default.Add, contentDescription = null) },
-            shape = RoundedCornerShape(15.dp),
-            onClick = {
-                locationService(context) { currentLocation ->
-                    viewModel.onEvent(
-                        MapEvent.OnAddItemClick(
-                            LatLng(
-                                currentLocation.latitude,
-                                currentLocation.longitude
+        if (loadingState) {
+            Log.d(TAG, "PickLocationFab: ProgressBar start")
+            CircularProgressBarComponent(true)
+        } else {
+
+            ExtendedFloatingActionButton(
+                modifier = modifier,
+                text = { Text(text = "New mushroom") },
+                icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                shape = RoundedCornerShape(15.dp),
+                onClick = {
+                    locationService(context) { currentLocation ->
+                        viewModel.onEvent(
+                            MapEvent.OnAddItemClick(
+                                LatLng(
+                                    currentLocation.latitude,
+                                    currentLocation.longitude
+                                )
                             )
                         )
-                    )
-                }
-            },
-        )
+                    }
+                },
+            )
+        }
     }
 }

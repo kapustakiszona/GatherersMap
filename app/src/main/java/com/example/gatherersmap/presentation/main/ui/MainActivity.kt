@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import com.example.gatherersmap.presentation.main.ui.bottomsheet.MainScreen
 import com.example.gatherersmap.theme.AppTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.android.gms.maps.model.LatLng
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPermissionsApi::class)
