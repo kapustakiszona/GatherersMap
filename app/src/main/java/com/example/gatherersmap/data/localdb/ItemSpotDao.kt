@@ -1,4 +1,4 @@
-package com.example.gatherersmap.data
+package com.example.gatherersmap.data.localdb
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -23,8 +23,4 @@ interface ItemSpotDao {
     @Update
     suspend fun updateItemSpotDetails(spot: ItemSpotEntity)
 
-    @Query(
-        "UPDATE itemSpotEntity SET name = :name, description = :description WHERE lng = :lng AND lat = :lat"
-    )
-    suspend fun updateItemSpot(lat: Double, lng: Double, description: String, name: String)
 }

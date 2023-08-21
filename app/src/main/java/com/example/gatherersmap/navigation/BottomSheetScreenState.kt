@@ -1,13 +1,14 @@
 @file:OptIn(
-    ExperimentalMaterialApi::class
+    ExperimentalMaterial3Api::class
 )
 
 package com.example.gatherersmap.navigation
 
-import androidx.compose.material.BottomSheetScaffoldState
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.gatherersmap.domain.model.ItemSpot
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 sealed class BottomSheetScreenState {
@@ -19,15 +20,23 @@ sealed class BottomSheetScreenState {
 
     data class Details(val itemSpot: ItemSpot) : BottomSheetScreenState()
 
-    fun showSheet(scaffoldState: BottomSheetScaffoldState, scope: CoroutineScope) {
+
+    fun showSheet(
+        scaffoldState: BottomSheetScaffoldState,
+        scope: CoroutineScope,
+    ) {
         scope.launch {
+            delay(200)
             scaffoldState.bottomSheetState.expand()
         }
     }
 
-    fun hideSheet(scaffoldState: BottomSheetScaffoldState, scope: CoroutineScope) {
+    fun hideSheet(
+        scaffoldState: BottomSheetScaffoldState,
+        scope: CoroutineScope,
+    ) {
         scope.launch {
-            scaffoldState.bottomSheetState.collapse()
+            scaffoldState.bottomSheetState.hide()
         }
     }
 }

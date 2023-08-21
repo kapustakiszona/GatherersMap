@@ -1,7 +1,8 @@
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 
-import androidx.compose.foundation.Image
+import android.util.Log
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,11 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,31 +27,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import com.example.gatherersmap.R
 import com.example.gatherersmap.domain.model.ItemSpot
+import com.example.gatherersmap.presentation.components.CircularProgressBarComponent
 import com.example.gatherersmap.presentation.components.DeletingDialogComposable
 import com.example.gatherersmap.presentation.components.GradientButtonComponent
+import com.example.gatherersmap.presentation.main.ui.MainActivity
+import com.example.gatherersmap.presentation.main.vm.MapViewModel
 
 @Composable
 fun DetailsSheetContent(
     itemSpot: ItemSpot,
     onEditClickListener: (ItemSpot) -> Unit,
-    onDeleteClickListener: (ItemSpot) -> Unit
+    onDeleteClickListener: (ItemSpot) -> Unit,
+    viewModel: MapViewModel = viewModel()
 ) {
-    val painter = rememberAsyncImagePainter(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(itemSpot.image)
-            .build(),
-        fallback = painterResource(R.drawable.image_placeholder)
-    )
+    val progressState = viewModel.deleteLoading
     Column(
-        modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp)
+        modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        if (progressState) {
+            CircularProgressBarComponent(true)
+        }
         Text(text = "${itemSpot.name}  id:${itemSpot.id}", fontSize = 26.sp)
         Text(
             text = itemSpot.description,
@@ -58,10 +61,30 @@ fun DetailsSheetContent(
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(Modifier.height(10.dp))
-        Image(
+        SubcomposeAsyncImage(
             modifier = Modifier.clip(RoundedCornerShape(10.dp)).size(200.dp),
-            painter = painter,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(itemSpot.image)
+                .build(),
             contentDescription = null,
+            loading = {
+                Box(
+                    modifier = Modifier.size(40.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressBarComponent(
+                        isShowed = true,
+                    )
+                }
+            },
+            error = {
+                Box(
+                    modifier = Modifier.size(40.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "Oops, something went wrong")
+                }
+            },
             contentScale = ContentScale.FillBounds
         )
         Spacer(Modifier.height(10.dp))
@@ -79,7 +102,7 @@ fun DetailsSheetContent(
 @Composable
 private fun Buttons(
     onEditClickListener: () -> Unit,
-    onDeleteClickListener: () -> Unit
+    onDeleteClickListener: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
