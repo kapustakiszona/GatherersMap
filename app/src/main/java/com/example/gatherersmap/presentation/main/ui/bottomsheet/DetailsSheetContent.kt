@@ -1,7 +1,6 @@
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,14 +28,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.presentation.components.CircularProgressBarComponent
 import com.example.gatherersmap.presentation.components.DeletingDialogComposable
 import com.example.gatherersmap.presentation.components.GradientButtonComponent
-import com.example.gatherersmap.presentation.main.ui.MainActivity
 import com.example.gatherersmap.presentation.main.vm.MapViewModel
 
 @Composable
@@ -44,7 +42,7 @@ fun DetailsSheetContent(
     itemSpot: ItemSpot,
     onEditClickListener: (ItemSpot) -> Unit,
     onDeleteClickListener: (ItemSpot) -> Unit,
-    viewModel: MapViewModel = viewModel()
+    viewModel: MapViewModel
 ) {
     val progressState = viewModel.deleteLoading
     Column(

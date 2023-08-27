@@ -11,21 +11,4 @@ import com.example.gatherersmap.MapApp
 )
 abstract class ItemSpotDatabase : RoomDatabase() {
     abstract val dao: ItemSpotDao
-
-    companion object {
-        @Volatile
-        private var INSTANCE: ItemSpotDatabase? = null
-        fun getDatabase(): ItemSpotDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    MapApp.instance,
-                    ItemSpotDatabase::class.java,
-                    "items_database"
-                ).fallbackToDestructiveMigration()
-                    .build()
-                INSTANCE = instance
-                instance
-            }
-        }
-    }
 }

@@ -1,5 +1,8 @@
 package com.example.gatherersmap.domain.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ItemSpot(
     var lat: Double,
     var lng: Double,
