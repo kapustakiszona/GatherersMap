@@ -1,6 +1,5 @@
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -43,7 +43,7 @@ import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.presentation.components.CircularProgressBarComponent
 import com.example.gatherersmap.presentation.components.TextFieldComponent
 import com.example.gatherersmap.presentation.components.imagePicker.ImagePicker
-import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
+import com.example.gatherersmap.presentation.components.reusables.SubcomposeRow
 import com.example.gatherersmap.presentation.main.vm.MapViewModel
 
 
@@ -64,7 +64,7 @@ fun EditDetailsSheetContent(
             .data(tempImage)
             .build(),
         onError = { error ->
-            Log.d(TAG, "error: ${error.result.throwable}")
+            //Log.d(TAG, "error: ${error.result.throwable}")
         },
         fallback = painterResource(R.drawable.image_placeholder),
     )
@@ -75,10 +75,8 @@ fun EditDetailsSheetContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
     ) {
-        if (progressState) {
-            Log.d(TAG, "EditDetailsSheetContent: ProgressBar started")
-            CircularProgressBarComponent(true)
-        }
+        CircularProgressBarComponent(progressState)
+
         TextFieldComponent(
             currentValue = newName,
             modifiedValue = { newValue ->
@@ -125,6 +123,7 @@ fun EditDetailsSheetContent(
             onCancelClicked = {
                 onCancelClicked(itemSpot)
             },
+            progressState = progressState
         )
     }
 }
@@ -134,15 +133,20 @@ fun EditDetailsSheetContent(
 private fun Buttons(
     onSaveClicked: () -> Unit,
     onCancelClicked: () -> Unit,
+    progressState: Boolean,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row() {
+        SubcomposeRow(
+            paddingBetween = 20.dp
+        ) {
             ElevatedButton(
+                contentPadding = ButtonDefaults.ContentPadding,
+                modifier = Modifier,
                 onClick = { onCancelClicked() },
-                enabled = true,
+                enabled = !progressState,
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 6.dp,
                     pressedElevation = 2.dp
@@ -161,10 +165,10 @@ private fun Buttons(
                     fontFamily = FontFamily.SansSerif,
                 )
             }
-            Spacer(modifier = Modifier.width(4.dp))
             ElevatedButton(
+                modifier = Modifier,
                 onClick = { onSaveClicked() },
-                enabled = true,
+                enabled = !progressState,
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 6.dp,
                     pressedElevation = 2.dp
@@ -184,5 +188,6 @@ private fun Buttons(
                 )
             }
         }
+        Spacer((Modifier.height(12.dp)))
     }
 }

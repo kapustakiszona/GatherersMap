@@ -4,9 +4,6 @@ import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,10 +13,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.presentation.location.locationService
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
@@ -130,45 +123,6 @@ fun MapScreen(
                     snippet = itemSpot.description
                 )
             }
-        }
-    }
-}
-
-
-@Composable
-fun PermissionLifecycleRequest(
-    request: MutableState<Boolean>,
-) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(key1 = lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_START -> {
-                    Log.d(TAG, "PermissionLifecycleRequest: onStart")
-                    request.value = true
-                }
-
-                Lifecycle.Event.ON_RESUME -> {
-                    request.value = true
-                    Log.d(TAG, "PermissionLifecycleRequest: onResumed")
-                }
-
-                Lifecycle.Event.ON_STOP -> {
-                    request.value = false
-                }
-
-                Lifecycle.Event.ON_CREATE -> {
-                    Log.d(TAG, "PermissionLifecycleRequest: onCreate")
-                }
-
-                else -> {
-
-                }
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer = observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer = observer)
         }
     }
 }

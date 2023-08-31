@@ -4,5 +4,4 @@ import com.example.gatherersmap.domain.model.ItemSpot
 
 data class MapState(
     val itemSpots: List<ItemSpot> = emptyList(),
-    val itemNetworkError: String? = null
 )

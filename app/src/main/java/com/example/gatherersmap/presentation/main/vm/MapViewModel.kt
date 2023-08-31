@@ -9,13 +9,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
 import com.example.gatherersmap.data.network.mapper.toListItemSpots
 import com.example.gatherersmap.domain.model.ItemSpot
+import com.example.gatherersmap.navigation.NavigationDestinations
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
+import com.example.gatherersmap.presentation.main.ui.snackbar.SnackbarNetworkError
 import com.example.gatherersmap.utils.NetworkResult
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
@@ -33,27 +37,51 @@ class MapViewModel @Inject constructor(
     private val _temporalMarker = MutableStateFlow<LatLng?>(null)
     val temporalMarker = _temporalMarker.asStateFlow()
 
+    private val _navigationDestination =
+        MutableStateFlow<NavigationDestinations>(NavigationDestinations.Current)
+    val navigationDestination = _navigationDestination.asStateFlow()
+
+    private val _networkErrorFlow = MutableSharedFlow<SnackbarNetworkError>()
+    val networkErrorFlow = _networkErrorFlow.asSharedFlow()
+
     var insertLoading by mutableStateOf(false)
     var getAllLoading by mutableStateOf(false)
     var deleteLoading by mutableStateOf(false)
     var updateLoading by mutableStateOf(false)
-
 
     init {
         Log.d(TAG, "INIT wm: ")
         getAllItemSpots()
     }
 
-    fun getAllItemSpots() {
+    private fun setErrorMessage(error: String, action: () -> Unit) {
+        viewModelScope.launch {
+            val errorData = SnackbarNetworkError(error, action)
+            _networkErrorFlow.emit(errorData)
+        }
+    }
+
+    fun setNavigationDestination(navDest: NavigationDestinations) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _navigationDestination.update {
+                navDest
+            }
+        }
+    }
+
+    private fun getAllItemSpots() {
         viewModelScope.launch {
             getAllLoading = true
             repository.getAllItemSpotsRemote()
                 .collectLatest { result ->
                     when (result) {
                         is NetworkResult.Error -> {
-                            _itemsState.update {
-                                it.copy(itemNetworkError = result.errorMessage)
-                            }
+                            setErrorMessage(
+                                error = result.errorMessage,
+                                action = {
+                                    getAllItemSpots()
+                                }
+                            )
                         }
 
                         is NetworkResult.Success -> {
@@ -68,43 +96,61 @@ class MapViewModel @Inject constructor(
     }
 
     suspend fun insertItemSpot(itemSpot: ItemSpot) {
-        viewModelScope.launch(Dispatchers.IO) {
-            insertLoading = true
-            delay(5000)
-            when (val result = repository.insertItemSpotRemote(itemSpot)) {
-                is NetworkResult.Error -> {
-                    _itemsState.update {
-                        it.copy(itemNetworkError = result.errorMessage)
+        insertLoading = true
+        delay(5000)
+        when (val result = repository.insertItemSpotRemote(itemSpot)) {
+            is NetworkResult.Error -> {
+                setErrorMessage(
+                    error = result.errorMessage,
+                    action = {
+                        viewModelScope.launch {
+                            insertItemSpot(itemSpot)
+                        }
                     }
-                }
-
-                is NetworkResult.Success -> {
-                    val fileName = result.data.fileName
+                )
+                _navigationDestination.update {
+                    NavigationDestinations.Current
                 }
             }
-            insertLoading = false
-            removeTemporalMarker()
-            getAllItemSpots()
-        }.join()
+
+            is NetworkResult.Success -> {
+                val fileName = result.data.fileName
+                _navigationDestination.update {
+                    NavigationDestinations.Details(itemSpot)
+                }
+                removeTemporalMarker()
+                getAllItemSpots()
+            }
+        }
+        insertLoading = false
     }
 
     suspend fun deleteItemSpot(itemSpot: ItemSpot) {
-        viewModelScope.launch(Dispatchers.IO) {
-            deleteLoading = true
-            when (val result = repository.deleteItemSpotRemote(itemSpot)) {
-                is NetworkResult.Error -> {
-                    _itemsState.update {
-                        it.copy(itemNetworkError = result.errorMessage)
+        deleteLoading = true
+        when (val result = repository.deleteItemSpotRemote(itemSpot)) {
+            is NetworkResult.Error -> {
+                setErrorMessage(
+                    error = result.errorMessage,
+                    action = {
+                        viewModelScope.launch {
+                            deleteItemSpot(itemSpot)
+                        }
                     }
-                }
-
-                is NetworkResult.Success -> {
-                    val isSuccess = result.data.isSuccess
+                )
+                _navigationDestination.update {
+                    NavigationDestinations.Current
                 }
             }
-            deleteLoading = false
-            getAllItemSpots()
-        }.join()
+
+            is NetworkResult.Success -> {
+                val isSuccess = result.data.isSuccess
+                _navigationDestination.update {
+                    NavigationDestinations.Map
+                }
+                getAllItemSpots()
+            }
+        }
+        deleteLoading = false
     }
 
     fun updateItemSpot(itemSpot: ItemSpot) {            //insert inside
@@ -123,6 +169,7 @@ class MapViewModel @Inject constructor(
         _temporalMarker.update {
             null
         }
+        // navigationDestination = NavigationDestinations.Map
     }
 
     private fun getItemSpotRemote(itemSpot: ItemSpot) {

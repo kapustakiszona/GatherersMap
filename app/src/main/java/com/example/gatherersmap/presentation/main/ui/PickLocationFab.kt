@@ -15,8 +15,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.gatherersmap.navigation.NavigationState
 import com.example.gatherersmap.navigation.ScreenState
 import com.example.gatherersmap.presentation.components.CircularProgressBarComponent
+import com.example.gatherersmap.presentation.components.reusables.ANIMATION_TIME_HALF_SEC
 import com.example.gatherersmap.presentation.components.reusables.ANIMATION_TIME_QTR_SEC
-import com.example.gatherersmap.presentation.components.reusables.AnimatedScaleInTransition
+import com.example.gatherersmap.presentation.components.reusables.AnimatedScaleInTransitionForFab
 import com.example.gatherersmap.presentation.location.locationService
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.google.android.gms.maps.model.LatLng
@@ -30,9 +31,11 @@ fun PickLocationFab(
 ) {
     val context = LocalContext.current
     val navBackStackEntry = navigationState.navHostController.currentBackStackEntryAsState()
-    AnimatedScaleInTransition(
-        visible = (navBackStackEntry.value?.destination?.route == ScreenState.GoogleMap.route),
-        animateDuration = ANIMATION_TIME_QTR_SEC
+    val visibility = (navBackStackEntry.value?.destination?.route == ScreenState.GoogleMap.route)
+    AnimatedScaleInTransitionForFab(
+        visible = visibility,
+        animateDurationExit = ANIMATION_TIME_QTR_SEC,
+        animateDurationEnter = ANIMATION_TIME_HALF_SEC
     ) {
         if (loadingState) {
             Log.d(TAG, "PickLocationFab: ProgressBar start")

@@ -1,5 +1,6 @@
 package com.example.gatherersmap.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -11,6 +12,7 @@ import androidx.navigation.navigation
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.navigation.ScreenState.Companion.KEY_ITEM_SPOT
 import com.example.gatherersmap.navigation.ScreenState.Companion.KEY_LAT_LNG_MARKER
+import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.vm.MapViewModel
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.google.accompanist.navigation.material.bottomSheet
@@ -26,13 +28,13 @@ fun AppNavGraph(
     detailsItemBottSheetContent: @Composable (ItemSpot) -> Unit,
     editItemBottSheetContent: @Composable (ItemSpot) -> Unit,
 ) {
-    val viewModel: MapViewModel = hiltViewModel()
     NavHost(
         navController = navHostController,
         startDestination = ScreenState.GoogleMap.route,
     ) {
+        Log.d(TAG, "AppNavGraph: ${navHostController.currentBackStackEntry?.destination}")
         composable(route = ScreenState.GoogleMap.route) {
-            mapScreenContent(viewModel)
+            mapScreenContent(hiltViewModel())
         }
         navigation(
             startDestination = ScreenState.GoogleMap.route,
@@ -71,7 +73,9 @@ fun AppNavGraph(
             bottomSheet(
                 route = ScreenState.BottSheetHome.Edit.route,
                 arguments = listOf(
-                    navArgument(KEY_ITEM_SPOT) {
+                    navArgument(
+                        name = KEY_ITEM_SPOT
+                    ) {
                         type = NavType.StringType
                     }
                 )
