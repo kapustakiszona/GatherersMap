@@ -1,9 +1,5 @@
 package com.example.gatherersmap.data.network
 
-import com.example.gatherersmap.data.network.dto.MushroomAddResponseDto
-import com.example.gatherersmap.data.network.dto.MushroomDeleteResponseDto
-import com.example.gatherersmap.data.network.dto.MushroomGetResponseDto
-import com.example.gatherersmap.data.network.dto.MushroomsGetAllResponseDto
 import com.example.gatherersmap.data.network.mapper.toInsertMushroomDto
 import com.example.gatherersmap.data.network.mapper.toMushroomDeleteRequestDto
 import com.example.gatherersmap.data.network.mapper.toMushroomGetRequestDto
@@ -12,8 +8,9 @@ import com.example.gatherersmap.utils.NetworkResult
 import com.example.gatherersmap.utils.handleApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class MushroomApi(
+class MushroomApi @Inject constructor(
     private val apiService: MushroomService,
 ) {
     suspend fun getItemSpot(itemSpot: ItemSpot) = withContext(Dispatchers.IO) {

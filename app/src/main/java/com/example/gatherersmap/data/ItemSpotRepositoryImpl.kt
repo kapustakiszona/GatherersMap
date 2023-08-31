@@ -11,8 +11,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class ItemSpotRepositoryImpl(
+class ItemSpotRepositoryImpl @Inject constructor(
     private val localDataSource: ItemSpotDatabase,
     private val remoteDataSource: MushroomApi,
 ) {

@@ -38,11 +38,11 @@ suspend fun <T : Any> handleApi(
         } catch (e: IOException) {
             e.printStackTrace()
             NetworkResult.Error(
-                errorMessage = "Check your network connection"
+                errorMessage = "Error. Check your network connection"
             )
         } catch (e: Throwable) {
             e.printStackTrace()
-            NetworkResult.Error(errorMessage = "Something went wrong")
+            NetworkResult.Error(errorMessage = "Error. Something went wrong")
         }
     }
 }

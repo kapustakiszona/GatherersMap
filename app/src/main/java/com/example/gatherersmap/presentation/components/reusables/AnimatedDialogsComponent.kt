@@ -31,6 +31,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 const val ANIMATION_TIME_QTR_SEC = 250L
+const val ANIMATION_TIME_HALF_SEC = 500L
 const val ANIMATION_TIME_ONE_SEC = 1000L
 const val DIALOG_BUILD_TIME = 300L
 
@@ -144,6 +145,25 @@ fun AnimatedScaleInTransition(
         ),
         exit = scaleOut(
             animationSpec = tween(animateDuration.toInt())
+        ),
+        content = content
+    )
+}
+
+@Composable
+fun AnimatedScaleInTransitionForFab(
+    visible: Boolean,
+    animateDurationEnter: Long,
+    animateDurationExit: Long,
+    content: @Composable AnimatedVisibilityScope.() -> Unit,
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = scaleIn(
+            animationSpec = tween(animateDurationEnter.toInt())
+        ),
+        exit = scaleOut(
+            animationSpec = tween(animateDurationExit.toInt())
         ),
         content = content
     )
