@@ -83,6 +83,7 @@ fun AppNavGraph(
                 val itemSpotJson =
                     it.arguments?.getString(KEY_ITEM_SPOT) ?: ""
                 val itemSpot = Json.decodeFromString<ItemSpot>(itemSpotJson)
+                Log.d(TAG, "AppNavGraph: itemspot -> ${itemSpot.name}")
                 editItemBottSheetContent(itemSpot)
             }
         }

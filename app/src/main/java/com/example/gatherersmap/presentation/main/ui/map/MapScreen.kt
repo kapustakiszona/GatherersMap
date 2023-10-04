@@ -112,7 +112,7 @@ fun MapScreen(
                         )
                     ),
                     onInfoWindowClick = {
-                        // TODO: придумать функционал
+                        // TODO: some feature
                     },
                     onClick = {
                         onMarkerClick(itemSpot)

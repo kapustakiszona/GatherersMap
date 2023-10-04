@@ -42,7 +42,7 @@ suspend fun <T : Any> handleApi(
             )
         } catch (e: Throwable) {
             e.printStackTrace()
-            NetworkResult.Error(errorMessage = "Error. Something went wrong")
+            NetworkResult.Error(errorMessage = "Error. Something went wrong ${e.message}")
         }
     }
 }

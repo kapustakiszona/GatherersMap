@@ -5,6 +5,7 @@
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
@@ -18,10 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import com.example.gatherersmap.data.network.mapper.compareSpots
 import com.example.gatherersmap.navigation.AppNavGraph
 import com.example.gatherersmap.navigation.NavigationDestinations
 import com.example.gatherersmap.navigation.NavigationHandler
 import com.example.gatherersmap.navigation.rememberNavigationState
+import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.PickLocationFab
 import com.example.gatherersmap.presentation.main.ui.map.MapScreen
 import com.example.gatherersmap.presentation.main.ui.snackbar.SnackBarNetworkErrorManager
@@ -51,9 +54,9 @@ fun MainScreen(viewModel: MapViewModel) {
             PickLocationFab(
                 navigationState = navigationState,
                 loadingState = loadingState,
-                addNewItemSpot = {
-                    viewModel.setTemporalMarker(it)
-                    navigationState.navigateToAddItem(it)
+                addNewItemSpot = { latLng ->
+                    viewModel.setTemporalMarker(latLng)
+                    navigationState.navigateToAddItem(latLng)
                 }
             )
         },
@@ -112,7 +115,7 @@ fun MainScreen(viewModel: MapViewModel) {
                                 viewModel.deleteItemSpot(itemSpot)
                             }
                         },
-                        viewModel = viewModel
+                        deleteProgress = viewModel.deleteLoading
                     )
                 },
                 addItemBottSheetContent = { newMarker ->
@@ -125,15 +128,17 @@ fun MainScreen(viewModel: MapViewModel) {
                         },
                         onSaveClicked = { itemSpot ->
                             coroutineScope.launch {
+                                Log.d(TAG, "MainScreen: saved item-> $itemSpot")
                                 viewModel.insertItemSpot(itemSpot)
                             }
                         },
-                        viewModel = viewModel
+                        insertProgress = viewModel.insertLoading,
+                        editProgress = viewModel.updateLoading,
                     )
                 },
-                editItemBottSheetContent = {
+                editItemBottSheetContent = { currentItem ->
                     EditDetailsSheetContent(
-                        itemSpot = it,
+                        itemSpot = currentItem,
                         onCancelClicked = { itemSpot ->
                             viewModel.setNavigationDestination(
                                 NavigationDestinations.Details(
@@ -141,13 +146,15 @@ fun MainScreen(viewModel: MapViewModel) {
                                 )
                             )
                         },
-                        onSaveClicked = { itemSpot ->
+                        onSaveClicked = { editedItemSpot ->
                             coroutineScope.launch {
-                                // TODO: navigate to details
-                                viewModel.updateItemSpot(itemSpot)
+                                // TODO: прогрессбар начинается не сразу после нажатия
+                                val updatedSpot = compareSpots(currentItem, editedItemSpot)
+                                viewModel.updateItemSpot(updatedSpot)
                             }
                         },
-                        viewModel = viewModel
+                        insertProgress = viewModel.insertLoading,
+                        editProgress = viewModel.updateLoading,
                     )
                 }
             )

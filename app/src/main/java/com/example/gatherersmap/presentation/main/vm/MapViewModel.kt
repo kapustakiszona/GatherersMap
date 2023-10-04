@@ -7,6 +7,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
+import com.example.gatherersmap.data.network.mapper.EditedItemSpot
+import com.example.gatherersmap.data.network.mapper.toItemSpot
 import com.example.gatherersmap.data.network.mapper.toListItemSpots
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.navigation.NavigationDestinations
@@ -63,6 +65,9 @@ class MapViewModel @Inject constructor(
 
     fun setNavigationDestination(navDest: NavigationDestinations) {
         viewModelScope.launch(Dispatchers.IO) {
+            if (_navigationDestination.value is NavigationDestinations.Add && navDest is NavigationDestinations.Details) {
+                removeTemporalMarker()
+            }// TODO: can be better?
             _navigationDestination.update {
                 navDest
             }
@@ -97,7 +102,7 @@ class MapViewModel @Inject constructor(
 
     suspend fun insertItemSpot(itemSpot: ItemSpot) {
         insertLoading = true
-        delay(5000)
+        delay(1000)
         when (val result = repository.insertItemSpotRemote(itemSpot)) {
             is NetworkResult.Error -> {
                 setErrorMessage(
@@ -108,9 +113,6 @@ class MapViewModel @Inject constructor(
                         }
                     }
                 )
-                _navigationDestination.update {
-                    NavigationDestinations.Current
-                }
             }
 
             is NetworkResult.Success -> {
@@ -137,9 +139,6 @@ class MapViewModel @Inject constructor(
                         }
                     }
                 )
-                _navigationDestination.update {
-                    NavigationDestinations.Current
-                }
             }
 
             is NetworkResult.Success -> {
@@ -153,9 +152,59 @@ class MapViewModel @Inject constructor(
         deleteLoading = false
     }
 
-    fun updateItemSpot(itemSpot: ItemSpot) {            //insert inside
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.insertItemSpotRemote(itemSpot)
+    suspend fun updateItemSpot(editedItemSpot: EditedItemSpot) {
+        updateLoading = true
+        when (val result = repository.updateItemSpotDetailsRemote(editedItemSpot)) {
+            is NetworkResult.Error -> {
+                setErrorMessage(
+                    error = result.errorMessage,
+                    action = {
+                        viewModelScope.launch {
+                            updateItemSpot(editedItemSpot)
+                        }
+                    }
+                )
+            }
+
+            is NetworkResult.Success -> {
+                val isSuccess = result.data.isSuccess
+                getItemSpot(editedItemSpot.toItemSpot())
+                val updatedItemSpot = _itemsState.value.itemSpots.find {
+                    (it.id == editedItemSpot.id)
+                } ?: editedItemSpot.toItemSpot()
+                _navigationDestination.update {
+                    NavigationDestinations.Details(updatedItemSpot)
+                }
+            }
+        }
+        updateLoading = false
+    }
+
+    suspend fun getItemSpot(itemSpot: ItemSpot) {
+        when (val result = repository.getItemSpotRemote(itemSpot)) {
+            is NetworkResult.Error -> {
+                setErrorMessage(
+                    error = result.errorMessage,
+                    action = {
+                        viewModelScope.launch {
+                            getItemSpot(itemSpot)
+                        }
+                    }
+                )
+            }
+
+            is NetworkResult.Success -> {
+                val item = result.data.mushroom?.toItemSpot() ?: itemSpot
+                val oldList = _itemsState.value.itemSpots
+                val updatedList = oldList.map {
+                    if (it.id == item.id) {
+                        item
+                    } else {
+                        it
+                    }
+                }
+                _itemsState.update { MapState(updatedList) }
+            }
         }
     }
 
@@ -172,9 +221,4 @@ class MapViewModel @Inject constructor(
         // navigationDestination = NavigationDestinations.Map
     }
 
-    private fun getItemSpotRemote(itemSpot: ItemSpot) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.getItemSpotRemote(itemSpot)
-        }
-    }
 }

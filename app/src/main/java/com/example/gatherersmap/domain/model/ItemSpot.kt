@@ -4,10 +4,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ItemSpot(
-    var lat: Double,
-    var lng: Double,
+    val lat: Double,
+    val lng: Double,
     val id: Int = 0,
-    var name: String = "",
-    var description: String = "",
-    var image: String? = null
+    val name: String = "",
+    val description: String = "",
+    val image: String? = null
 )

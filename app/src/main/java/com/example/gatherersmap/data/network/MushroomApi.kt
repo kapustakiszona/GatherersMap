@@ -1,8 +1,10 @@
 package com.example.gatherersmap.data.network
 
+import com.example.gatherersmap.data.network.mapper.EditedItemSpot
 import com.example.gatherersmap.data.network.mapper.toInsertMushroomDto
 import com.example.gatherersmap.data.network.mapper.toMushroomDeleteRequestDto
 import com.example.gatherersmap.data.network.mapper.toMushroomGetRequestDto
+import com.example.gatherersmap.data.network.mapper.toMushroomUpdateRequestDto
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.utils.NetworkResult
 import com.example.gatherersmap.utils.handleApi
@@ -40,6 +42,14 @@ class MushroomApi @Inject constructor(
     suspend fun deleteItemSpot(itemSpot: ItemSpot) = withContext(Dispatchers.IO) {
         try {
             handleApi { apiService.deleteItemSpot(spotId = itemSpot.toMushroomDeleteRequestDto()) }
+        } catch (e: Exception) {
+            NetworkResult.Error(errorMessage = e.message.toString())
+        }
+    }
+
+    suspend fun updateItemSpot(itemSpot: EditedItemSpot) = withContext(Dispatchers.IO) {
+        try {
+            handleApi { apiService.updateItemSpotDetails(spot = itemSpot.toMushroomUpdateRequestDto()) }
         } catch (e: Exception) {
             NetworkResult.Error(errorMessage = e.message.toString())
         }

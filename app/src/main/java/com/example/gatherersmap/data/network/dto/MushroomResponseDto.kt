@@ -1,5 +1,8 @@
 package com.example.gatherersmap.data.network.dto
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class MushroomResponseDto(
     val description: String,
     val id: Int,

@@ -4,6 +4,7 @@ import com.example.gatherersmap.data.localdb.ItemSpotDatabase
 import com.example.gatherersmap.data.localdb.mapper.toItemSpot
 import com.example.gatherersmap.data.localdb.mapper.toItemSpotEntity
 import com.example.gatherersmap.data.network.MushroomApi
+import com.example.gatherersmap.data.network.mapper.EditedItemSpot
 import com.example.gatherersmap.domain.model.ItemSpot
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -47,9 +48,10 @@ class ItemSpotRepositoryImpl @Inject constructor(
             localDataSource.dao.updateItemSpotDetails(spot = spot.toItemSpotEntity())
         }
 
-    suspend fun updateItemSpotDetailsRemote(spot: ItemSpot) {
-        TODO("Not yet implemented")
-    }
+    suspend fun updateItemSpotDetailsRemote(spot: EditedItemSpot) =
+        withContext(dispatcherIO) {
+            remoteDataSource.updateItemSpot(itemSpot = spot)
+        }
 
     fun getAllItemSpotsLocal(): Flow<List<ItemSpot>> {
         return localDataSource.dao.getItemSpots().map { itemSpots ->
@@ -65,9 +67,9 @@ class ItemSpotRepositoryImpl @Inject constructor(
         emit(result)
     }
 
-    suspend fun getItemSpotRemote(spot: ItemSpot): ItemSpot =
+    suspend fun getItemSpotRemote(spot: ItemSpot) =
         withContext(dispatcherIO) {
-            TODO("Not yet implemented")
+            remoteDataSource.getItemSpot(itemSpot = spot)
         }
 
     suspend fun getItemSpotLocal(spot: ItemSpot) {

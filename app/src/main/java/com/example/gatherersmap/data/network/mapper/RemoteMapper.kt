@@ -1,16 +1,17 @@
 package com.example.gatherersmap.data.network.mapper
 
-import android.net.Uri
-import com.example.gatherersmap.MapApp
 import com.example.gatherersmap.data.network.dto.MushroomAddRequestDto
 import com.example.gatherersmap.data.network.dto.MushroomDeleteRequestDto
 import com.example.gatherersmap.data.network.dto.MushroomGetRequestDto
 import com.example.gatherersmap.data.network.dto.MushroomResponseDto
+import com.example.gatherersmap.data.network.dto.MushroomUpdateRequestDto
 import com.example.gatherersmap.data.network.dto.MushroomsGetAllResponseDto
 import com.example.gatherersmap.domain.model.ItemSpot
-import com.example.gatherersmap.utils.toBase64
+import com.example.gatherersmap.utils.Constants.BASE_IMAGE_URL
+import com.example.gatherersmap.utils.convertUriToBase64
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-const val BASE_IMAGE_URL = "http://185.105.88.49:8080/mushroom/images/"
 fun MushroomsGetAllResponseDto.toListItemSpots(): List<ItemSpot> {
     return mushrooms.map { it.toItemSpot() }
 }
@@ -26,28 +27,15 @@ fun MushroomResponseDto.toItemSpot(): ItemSpot {
     )
 }
 
-private fun tryReadFile(image: String): String? {
-    val contentResolver = MapApp.instance.contentResolver
-    val androidUri = Uri.parse(image)
-    try {
-        contentResolver.query(
-            androidUri,
-            null,
-            null,
-            null,
-            null
-        )!!.use { cursor ->
-            if (cursor.count == 0) throw IllegalStateException("File not found")
-            cursor.moveToFirst()
-            val bytes = contentResolver.openInputStream(androidUri)!!.use { inputStream ->
-                inputStream.readBytes()
-            }
-            return bytes.toBase64()
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        return null
-    }
+fun EditedItemSpot.toItemSpot(): ItemSpot {
+    return ItemSpot(
+        description = description ?: "",
+        id = id,
+        image = image,
+        lat = lat ?: 0.0,
+        lng = lng ?: 0.0,
+        name = name ?: ""
+    )
 }
 
 fun ItemSpot.toMushroomDeleteRequestDto(): MushroomDeleteRequestDto {
@@ -62,12 +50,23 @@ fun ItemSpot.toMushroomGetRequestDto(): MushroomGetRequestDto {
     )
 }
 
-fun ItemSpot.toInsertMushroomDto(): MushroomAddRequestDto {
+suspend fun ItemSpot.toInsertMushroomDto(): MushroomAddRequestDto {
     return MushroomAddRequestDto(
         description = description,
-        image = tryReadFile(image.orEmpty()) ?: "",
+        image = withContext(Dispatchers.IO) { convertUriToBase64(image) },
         lat = lat,
         lon = lng,
+        name = name,
+    )
+}
+
+fun EditedItemSpot.toMushroomUpdateRequestDto(): MushroomUpdateRequestDto {
+    return MushroomUpdateRequestDto(
+        description = description,
+        id = id,
+        image = image,
+        lat = lat,
+        lng = lng,
         name = name
     )
 }
