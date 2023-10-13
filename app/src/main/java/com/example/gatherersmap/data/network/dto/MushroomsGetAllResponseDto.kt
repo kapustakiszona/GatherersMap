@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MushroomsGetAllResponseDto(
     @SerializedName("error") val errorResponse: ErrorResponse? = null,
-    @SerializedName("mushrooms") val mushrooms: List<MushroomResponseDto>,
+    @SerializedName("mushrooms") val mushrooms: List<MushroomResponseDto>?,
 )

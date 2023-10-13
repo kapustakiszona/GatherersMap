@@ -5,7 +5,6 @@
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
@@ -24,7 +23,6 @@ import com.example.gatherersmap.navigation.AppNavGraph
 import com.example.gatherersmap.navigation.NavigationDestinations
 import com.example.gatherersmap.navigation.NavigationHandler
 import com.example.gatherersmap.navigation.rememberNavigationState
-import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.PickLocationFab
 import com.example.gatherersmap.presentation.main.ui.map.MapScreen
 import com.example.gatherersmap.presentation.main.ui.snackbar.SnackBarNetworkErrorManager
@@ -41,7 +39,7 @@ import kotlinx.coroutines.launch
 @ExperimentalPermissionsApi
 @Composable
 fun MainScreen(viewModel: MapViewModel) {
-    val loadingState = viewModel.getAllLoading
+    val loadingState = viewModel.getAllNetworkProgress
     val coroutineScope = rememberCoroutineScope()
     val bottomSheetNavigator = rememberBottomSheetNavigator()
     val navController = rememberNavController(bottomSheetNavigator)
@@ -112,10 +110,10 @@ fun MainScreen(viewModel: MapViewModel) {
                         },
                         onDeleteClickListener = { itemSpot ->
                             coroutineScope.launch {
-                                viewModel.deleteItemSpot(itemSpot)
+                                viewModel.deleteItemSpot(itemSpotId = itemSpot.id)
                             }
                         },
-                        deleteProgress = viewModel.deleteLoading
+                        deleteProgress = viewModel.deleteNetworkProgress
                     )
                 },
                 addItemBottSheetContent = { newMarker ->
@@ -128,12 +126,10 @@ fun MainScreen(viewModel: MapViewModel) {
                         },
                         onSaveClicked = { itemSpot ->
                             coroutineScope.launch {
-                                Log.d(TAG, "MainScreen: saved item-> $itemSpot")
                                 viewModel.insertItemSpot(itemSpot)
                             }
                         },
-                        insertProgress = viewModel.insertLoading,
-                        editProgress = viewModel.updateLoading,
+                        insertAndUpdateNetworkProgress = viewModel.insertAndUpdateNetworkProgress,
                     )
                 },
                 editItemBottSheetContent = { currentItem ->
@@ -153,8 +149,7 @@ fun MainScreen(viewModel: MapViewModel) {
                                 viewModel.updateItemSpot(updatedSpot)
                             }
                         },
-                        insertProgress = viewModel.insertLoading,
-                        editProgress = viewModel.updateLoading,
+                        insertAndUpdateNetworkProgress = viewModel.insertAndUpdateNetworkProgress,
                     )
                 }
             )

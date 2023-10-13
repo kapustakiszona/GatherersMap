@@ -33,9 +33,9 @@ class ItemSpotRepositoryImpl @Inject constructor(
             localDataSource.dao.insertItemSpot(spot = spot.toItemSpotEntity())
         }
 
-    suspend fun deleteItemSpotRemote(spot: ItemSpot) =
+    suspend fun deleteItemSpotRemote(spotId: Int) =
         withContext(dispatcherIO) {
-            remoteDataSource.deleteItemSpot(spot)
+            remoteDataSource.deleteItemSpot(itemId = spotId)
         }
 
     suspend fun deleteItemSpotLocal(spot: ItemSpot) =
@@ -67,9 +67,9 @@ class ItemSpotRepositoryImpl @Inject constructor(
         emit(result)
     }
 
-    suspend fun getItemSpotRemote(spot: ItemSpot) =
+    suspend fun getItemSpotRemote(spotId: Int) =
         withContext(dispatcherIO) {
-            remoteDataSource.getItemSpot(itemSpot = spot)
+            remoteDataSource.getItemSpot(itemId = spotId)
         }
 
     suspend fun getItemSpotLocal(spot: ItemSpot) {

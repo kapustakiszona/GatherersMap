@@ -1,6 +1,7 @@
 package com.example.gatherersmap.presentation.main.vm
 
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,14 +19,19 @@ import com.example.gatherersmap.utils.NetworkResult
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,14 +52,15 @@ class MapViewModel @Inject constructor(
     private val _networkErrorFlow = MutableSharedFlow<SnackbarNetworkError>()
     val networkErrorFlow = _networkErrorFlow.asSharedFlow()
 
-    var insertLoading by mutableStateOf(false)
-    var getAllLoading by mutableStateOf(false)
-    var deleteLoading by mutableStateOf(false)
-    var updateLoading by mutableStateOf(false)
+    var getAllNetworkProgress by mutableStateOf(false)
+    var deleteNetworkProgress by mutableStateOf(false)
+    var insertAndUpdateNetworkProgress by mutableStateOf(false)
 
     init {
         Log.d(TAG, "INIT wm: ")
-        getAllItemSpots()
+        viewModelScope.launch {
+            getAllItemSpots()
+        }
     }
 
     private fun setErrorMessage(error: String, action: () -> Unit) {
@@ -76,7 +83,7 @@ class MapViewModel @Inject constructor(
 
     private fun getAllItemSpots() {
         viewModelScope.launch {
-            getAllLoading = true
+            getAllNetworkProgress = true
             repository.getAllItemSpotsRemote()
                 .collectLatest { result ->
                     when (result) {
@@ -91,17 +98,18 @@ class MapViewModel @Inject constructor(
 
                         is NetworkResult.Success -> {
                             _itemsState.update {
-                                it.copy(itemSpots = result.data.toListItemSpots())
+                                MapState(itemSpots = result.data.toListItemSpots())
+                                // it.copy(itemSpots = result.data.toListItemSpots())
                             }
                         }
                     }
                 }
-            getAllLoading = false
+            getAllNetworkProgress = false
         }
     }
 
     suspend fun insertItemSpot(itemSpot: ItemSpot) {
-        insertLoading = true
+        insertAndUpdateNetworkProgress = true
         delay(1000)
         when (val result = repository.insertItemSpotRemote(itemSpot)) {
             is NetworkResult.Error -> {
@@ -116,26 +124,32 @@ class MapViewModel @Inject constructor(
             }
 
             is NetworkResult.Success -> {
-                val fileName = result.data.fileName
+                getAllItemSpots()
+                val newItemId = result.data.itemId
+                //getItemSpot(newItemId ?: 0)
+                val newItem = _itemsState.value.itemSpots.find {
+                    it.id == newItemId
+                }
+                Log.d(TAG, "insertItemSpot: newItem->$newItem")
                 _navigationDestination.update {
-                    NavigationDestinations.Details(itemSpot)
+                    NavigationDestinations.Details(newItem ?: itemSpot)
                 }
                 removeTemporalMarker()
-                getAllItemSpots()
+                // getAllItemSpots()
             }
         }
-        insertLoading = false
+        insertAndUpdateNetworkProgress = false
     }
 
-    suspend fun deleteItemSpot(itemSpot: ItemSpot) {
-        deleteLoading = true
-        when (val result = repository.deleteItemSpotRemote(itemSpot)) {
+    suspend fun deleteItemSpot(itemSpotId: Int) {
+        deleteNetworkProgress = true
+        when (val result = repository.deleteItemSpotRemote(itemSpotId)) {
             is NetworkResult.Error -> {
                 setErrorMessage(
                     error = result.errorMessage,
                     action = {
                         viewModelScope.launch {
-                            deleteItemSpot(itemSpot)
+                            deleteItemSpot(itemSpotId)
                         }
                     }
                 )
@@ -149,61 +163,80 @@ class MapViewModel @Inject constructor(
                 getAllItemSpots()
             }
         }
-        deleteLoading = false
+        deleteNetworkProgress = false
     }
 
     suspend fun updateItemSpot(editedItemSpot: EditedItemSpot) {
-        updateLoading = true
-        when (val result = repository.updateItemSpotDetailsRemote(editedItemSpot)) {
-            is NetworkResult.Error -> {
-                setErrorMessage(
-                    error = result.errorMessage,
-                    action = {
-                        viewModelScope.launch {
-                            updateItemSpot(editedItemSpot)
+        insertAndUpdateNetworkProgress = true
+        try {
+            when (val result = repository.updateItemSpotDetailsRemote(editedItemSpot)) {
+                is NetworkResult.Error -> {
+                    setErrorMessage(
+                        error = result.errorMessage,
+                        action = {
+                            viewModelScope.launch {
+                                updateItemSpot(editedItemSpot)
+                            }
                         }
-                    }
-                )
-            }
+                    )
+                }
 
-            is NetworkResult.Success -> {
-                val isSuccess = result.data.isSuccess
-                getItemSpot(editedItemSpot.toItemSpot())
-                val updatedItemSpot = _itemsState.value.itemSpots.find {
-                    (it.id == editedItemSpot.id)
-                } ?: editedItemSpot.toItemSpot()
-                _navigationDestination.update {
-                    NavigationDestinations.Details(updatedItemSpot)
+                is NetworkResult.Success -> {
+                    getAllItemSpots().also { Log.d(TAG, "updateItemSpot: getAll running") }
+                    val updatedItemSpot: ItemSpot =
+                        itemsState.value.itemSpots.find {
+                            (it.id == editedItemSpot.id)
+                        } ?: editedItemSpot.toItemSpot()
+
+                    Log.d(TAG, "updateItemSpot: UPDspot ->>>>> $updatedItemSpot")
+                    _navigationDestination.update {
+                        NavigationDestinations.Details(updatedItemSpot)
+                    }
                 }
             }
+        } finally {
+            insertAndUpdateNetworkProgress = false
         }
-        updateLoading = false
     }
 
-    suspend fun getItemSpot(itemSpot: ItemSpot) {
-        when (val result = repository.getItemSpotRemote(itemSpot)) {
+    suspend fun getItemSpot(itemSpotId: Int) {
+        when (val result = repository.getItemSpotRemote(spotId = itemSpotId)) {
             is NetworkResult.Error -> {
                 setErrorMessage(
                     error = result.errorMessage,
                     action = {
                         viewModelScope.launch {
-                            getItemSpot(itemSpot)
+                            getItemSpot(itemSpotId)
                         }
                     }
                 )
             }
 
             is NetworkResult.Success -> {
-                val item = result.data.mushroom?.toItemSpot() ?: itemSpot
-                val oldList = _itemsState.value.itemSpots
-                val updatedList = oldList.map {
-                    if (it.id == item.id) {
-                        item
-                    } else {
-                        it
+                val item = result.data.mushroom?.toItemSpot()
+                val oldList = itemsState.value.itemSpots.toMutableList().also {
+                    Log.d(TAG, "getItemSpot: before map ${it.size}")
+                }
+                val isExist = oldList.find {
+                    it.id == item!!.id
+                }
+                if (isExist == null) {
+                    oldList.add(item!!)
+                } else {
+                    oldList.map {
+                        if (it.id == isExist.id) {
+                            val a = it.copy(
+                                name = item?.name.orEmpty(),
+                                description = item?.description.orEmpty(),
+                                image = item?.image.orEmpty()
+                            ).also { newItem -> Log.d(TAG, "getItemSpot: replaced -> $newItem") }
+                            a
+                        } else {
+                            it
+                        }
                     }
                 }
-                _itemsState.update { MapState(updatedList) }
+                _itemsState.update { MapState(oldList) }
             }
         }
     }

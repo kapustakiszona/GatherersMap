@@ -33,6 +33,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.gatherersmap.domain.model.ItemSpot
@@ -40,6 +42,7 @@ import com.example.gatherersmap.presentation.components.CircularProgressBarCompo
 import com.example.gatherersmap.presentation.components.DeletingDialogComposable
 import com.example.gatherersmap.presentation.components.reusables.SubcomposeRow
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
+import com.example.gatherersmap.presentation.main.vm.MapViewModel
 
 @Composable
 fun DetailsSheetContent(

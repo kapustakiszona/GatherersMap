@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,8 +52,7 @@ fun EditDetailsSheetContent(
     itemSpot: ItemSpot,
     onSaveClicked: (ItemSpot) -> Unit,
     onCancelClicked: (ItemSpot) -> Unit,
-    insertProgress: Boolean,
-    editProgress: Boolean,
+    insertAndUpdateNetworkProgress: Boolean,
 ) {
     var modifiedItem by remember { mutableStateOf(itemSpot) }
     var tempImage by rememberSaveable { mutableStateOf(itemSpot.image) }
@@ -76,7 +74,7 @@ fun EditDetailsSheetContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
     ) {
-        CircularProgressBarComponent(insertProgress or editProgress)
+        CircularProgressBarComponent(insertAndUpdateNetworkProgress)
 
         TextFieldComponent(
             currentValue = newName,
@@ -126,7 +124,7 @@ fun EditDetailsSheetContent(
             onCancelClicked = {
                 onCancelClicked(itemSpot)
             },
-            progressState = insertProgress or editProgress
+            progressState = insertAndUpdateNetworkProgress
         )
     }
 }

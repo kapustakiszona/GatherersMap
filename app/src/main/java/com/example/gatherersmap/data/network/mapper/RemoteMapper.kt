@@ -13,17 +13,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 fun MushroomsGetAllResponseDto.toListItemSpots(): List<ItemSpot> {
-    return mushrooms.map { it.toItemSpot() }
+    return mushrooms.orEmpty().map { it.toItemSpot() }
 }
 
 fun MushroomResponseDto.toItemSpot(): ItemSpot {
     return ItemSpot(
-        lat = lat,
-        lng = lon,
-        id = id,
-        name = name,
-        description = description,
-        image = BASE_IMAGE_URL + image
+        lat = lat ?: 0.0,
+        lng = lon ?: 0.0,
+        id = id ?: 0,
+        name = name.orEmpty(),
+        description = description.orEmpty(),
+        image = BASE_IMAGE_URL + image.orEmpty()
     )
 }
 
