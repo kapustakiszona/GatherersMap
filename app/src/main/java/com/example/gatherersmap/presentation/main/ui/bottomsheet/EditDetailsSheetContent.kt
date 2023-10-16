@@ -1,5 +1,6 @@
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -44,21 +45,19 @@ import com.example.gatherersmap.presentation.components.CircularProgressBarCompo
 import com.example.gatherersmap.presentation.components.TextFieldComponent
 import com.example.gatherersmap.presentation.components.imagePicker.ImagePicker
 import com.example.gatherersmap.presentation.components.reusables.SubcomposeRow
-import com.example.gatherersmap.presentation.main.vm.MapViewModel
-
+import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 
 @Composable
 fun EditDetailsSheetContent(
     itemSpot: ItemSpot,
     onSaveClicked: (ItemSpot) -> Unit,
     onCancelClicked: (ItemSpot) -> Unit,
-    viewModel: MapViewModel,
+    insertAndUpdateNetworkProgress: Boolean,
 ) {
-    val modifiedItem by remember { mutableStateOf(itemSpot) }
+    var modifiedItem by remember { mutableStateOf(itemSpot) }
     var tempImage by rememberSaveable { mutableStateOf(itemSpot.image) }
     var newName by rememberSaveable { mutableStateOf(itemSpot.name) }
     var newDescription by rememberSaveable { mutableStateOf(itemSpot.description) }
-    val progressState = viewModel.insertLoading
     val painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(LocalContext.current)
             .data(tempImage)
@@ -75,26 +74,27 @@ fun EditDetailsSheetContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
     ) {
-        CircularProgressBarComponent(progressState)
+        CircularProgressBarComponent(insertAndUpdateNetworkProgress)
 
         TextFieldComponent(
             currentValue = newName,
             modifiedValue = { newValue ->
                 newName = newValue
-                modifiedItem.name = newName
+                modifiedItem = modifiedItem.copy(name = newName)
             },
-            label = "Name"
+            label = "Mushroom Name"
         )
         TextFieldComponent(
             currentValue = newDescription,
             modifiedValue = { newValue ->
                 newDescription = newValue
-                modifiedItem.description = newDescription
+                modifiedItem = modifiedItem.copy(description = newDescription)
             },
             label = "Description"
         )
         Row(
             modifier = Modifier
+                .padding(8.dp)
                 .border(
                     width = 1.dp,
                     color = Color.Gray,
@@ -103,8 +103,8 @@ fun EditDetailsSheetContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             ImagePicker(
-                onImagePick = {
-                    tempImage = it
+                onImagePick = { uri ->
+                    tempImage = uri
                 }
             )
             Spacer(modifier = Modifier.width(6.dp))
@@ -117,13 +117,14 @@ fun EditDetailsSheetContent(
         }
         Buttons(
             onSaveClicked = {
-                modifiedItem.image = tempImage
+                modifiedItem = modifiedItem.copy(image = tempImage)
                 onSaveClicked(modifiedItem)
+                Log.d(TAG, "EditDetailsSheetContent: save clicked")
             },
             onCancelClicked = {
                 onCancelClicked(itemSpot)
             },
-            progressState = progressState
+            progressState = insertAndUpdateNetworkProgress
         )
     }
 }

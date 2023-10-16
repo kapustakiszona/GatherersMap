@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import com.example.gatherersmap.data.network.mapper.compareSpots
 import com.example.gatherersmap.navigation.AppNavGraph
 import com.example.gatherersmap.navigation.NavigationDestinations
 import com.example.gatherersmap.navigation.NavigationHandler
@@ -38,7 +39,7 @@ import kotlinx.coroutines.launch
 @ExperimentalPermissionsApi
 @Composable
 fun MainScreen(viewModel: MapViewModel) {
-    val loadingState = viewModel.getAllLoading
+    val loadingState = viewModel.getAllNetworkProgress
     val coroutineScope = rememberCoroutineScope()
     val bottomSheetNavigator = rememberBottomSheetNavigator()
     val navController = rememberNavController(bottomSheetNavigator)
@@ -51,9 +52,9 @@ fun MainScreen(viewModel: MapViewModel) {
             PickLocationFab(
                 navigationState = navigationState,
                 loadingState = loadingState,
-                addNewItemSpot = {
-                    viewModel.setTemporalMarker(it)
-                    navigationState.navigateToAddItem(it)
+                addNewItemSpot = { latLng ->
+                    viewModel.setTemporalMarker(latLng)
+                    navigationState.navigateToAddItem(latLng)
                 }
             )
         },
@@ -109,10 +110,10 @@ fun MainScreen(viewModel: MapViewModel) {
                         },
                         onDeleteClickListener = { itemSpot ->
                             coroutineScope.launch {
-                                viewModel.deleteItemSpot(itemSpot)
+                                viewModel.deleteItemSpot(itemSpotId = itemSpot.id)
                             }
                         },
-                        viewModel = viewModel
+                        deleteProgress = viewModel.deleteNetworkProgress
                     )
                 },
                 addItemBottSheetContent = { newMarker ->
@@ -128,12 +129,12 @@ fun MainScreen(viewModel: MapViewModel) {
                                 viewModel.insertItemSpot(itemSpot)
                             }
                         },
-                        viewModel = viewModel
+                        insertAndUpdateNetworkProgress = viewModel.insertAndUpdateNetworkProgress,
                     )
                 },
-                editItemBottSheetContent = {
+                editItemBottSheetContent = { currentItem ->
                     EditDetailsSheetContent(
-                        itemSpot = it,
+                        itemSpot = currentItem,
                         onCancelClicked = { itemSpot ->
                             viewModel.setNavigationDestination(
                                 NavigationDestinations.Details(
@@ -141,13 +142,14 @@ fun MainScreen(viewModel: MapViewModel) {
                                 )
                             )
                         },
-                        onSaveClicked = { itemSpot ->
+                        onSaveClicked = { editedItemSpot ->
                             coroutineScope.launch {
-                                // TODO: navigate to details
-                                viewModel.updateItemSpot(itemSpot)
+                                // TODO: прогрессбар начинается не сразу после нажатия
+                                val updatedSpot = compareSpots(currentItem, editedItemSpot)
+                                viewModel.updateItemSpot(updatedSpot)
                             }
                         },
-                        viewModel = viewModel
+                        insertAndUpdateNetworkProgress = viewModel.insertAndUpdateNetworkProgress,
                     )
                 }
             )

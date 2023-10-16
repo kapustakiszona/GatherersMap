@@ -6,6 +6,8 @@ import com.example.gatherersmap.data.network.dto.MushroomDeleteRequestDto
 import com.example.gatherersmap.data.network.dto.MushroomDeleteResponseDto
 import com.example.gatherersmap.data.network.dto.MushroomGetRequestDto
 import com.example.gatherersmap.data.network.dto.MushroomGetResponseDto
+import com.example.gatherersmap.data.network.dto.MushroomUpdateRequestDto
+import com.example.gatherersmap.data.network.dto.MushroomUpdateResponseDto
 import com.example.gatherersmap.data.network.dto.MushroomsGetAllResponseDto
 import com.example.gatherersmap.domain.model.ItemSpot
 import retrofit2.Response
@@ -23,7 +25,8 @@ interface MushroomService {
     @POST("/mushroom/get")
     suspend fun getItemSpot(@Body spotId: MushroomGetRequestDto): Response<MushroomGetResponseDto>
 
-    suspend fun updateItemSpotDetails(spot: ItemSpot)
+    @POST("/mushroom/update")
+    suspend fun updateItemSpotDetails(@Body spot: MushroomUpdateRequestDto): Response<MushroomUpdateResponseDto>
 
     @POST("/mushroom/getAll")
     suspend fun getItemSpots(): Response<MushroomsGetAllResponseDto>

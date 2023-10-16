@@ -7,6 +7,7 @@ import com.example.gatherersmap.data.localdb.ItemSpotDatabase
 import com.example.gatherersmap.data.network.MushroomApi
 import com.example.gatherersmap.data.network.MushroomService
 import com.example.gatherersmap.utils.Constants
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,14 +46,22 @@ object AppModule {
             .build()
     }
 
+// TODO:   provideKotlinSerialization(): Converter.Factory
+
+
     @Singleton
     @Provides
-    fun provideRetrofit(BASE_URL: String, okHttpClient: OkHttpClient): Retrofit =
-        Retrofit.Builder()
+    fun provideRetrofit(BASE_URL: String, okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(
+                GsonConverterFactory.create(
+                    GsonBuilder().serializeNulls().create()
+                )
+            )
             .client(okHttpClient)
             .build()
+    }
 
     @Singleton
     @Provides
