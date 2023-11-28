@@ -4,11 +4,10 @@ import com.example.gatherersmap.data.network.dto.MushroomAddRequestDto
 import com.example.gatherersmap.data.network.dto.MushroomDeleteRequestDto
 import com.example.gatherersmap.data.network.dto.MushroomGetRequestDto
 import com.example.gatherersmap.data.network.mapper.EditedItemSpot
-import com.example.gatherersmap.data.network.mapper.toInsertMushroomDto
-import com.example.gatherersmap.data.network.mapper.toMushroomDeleteRequestDto
 import com.example.gatherersmap.data.network.mapper.toMushroomUpdateRequestDto
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.utils.NetworkResult
+import com.example.gatherersmap.utils.convertBmpUriToBase64
 import com.example.gatherersmap.utils.handleApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -42,7 +41,7 @@ class MushroomApi @Inject constructor(
                         lat = itemSpot.lat,
                         lon = itemSpot.lng,
                         name = itemSpot.name,
-                        image = itemSpot.image
+                        image = itemSpot.image.convertBmpUriToBase64()
                     )
                 )
             }

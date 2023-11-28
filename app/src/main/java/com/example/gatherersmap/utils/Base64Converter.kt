@@ -34,9 +34,9 @@ private fun bitmapToBase64(bitmap: Bitmap?): String? {
     return base64.replace("\n", "")
 }
 
-fun convertUriToBase64(uri: String?): String {
+fun String?.convertBmpUriToBase64(): String {
     val contentResolver = MapApp.instance.contentResolver
-    val androidUri = if (uri != null) Uri.parse(uri) else Uri.EMPTY
+    val androidUri = if (this != null) Uri.parse(this) else Uri.EMPTY
     val bitmap = getBitmapFromUri(contentResolver, androidUri)
     return bitmapToBase64(bitmap).orEmpty()
 }

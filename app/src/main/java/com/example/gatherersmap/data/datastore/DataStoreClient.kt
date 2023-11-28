@@ -2,7 +2,7 @@ package com.example.gatherersmap.data.datastore
 
 import com.example.gatherersmap.MapApp
 
-object DataStoreRepository {
+object DataStoreClient {
     @Volatile
     private var INSTANCE: DataStoreManager? = null
     fun getDataStore(): DataStoreManager {

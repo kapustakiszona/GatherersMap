@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterialApi::class, ExperimentalPermissionsApi::class)
+
 
 package com.example.gatherersmap.presentation.main.ui.settings
 
@@ -16,15 +16,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +58,7 @@ fun PrevSet() {
     )
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SettingsDialogContent(
     //  viewModel: MapViewModel = viewModel(),
@@ -184,18 +183,18 @@ private fun SettingSwitchItem(
             modifier = Modifier.weight(1.0f),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
+//            val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
 
             Text(
                 text = stringResource(id = title),
                 style = MaterialTheme.typography.bodyLarge,
                 maxLines = 1,
-                modifier = Modifier.alpha(contentAlpha)
+//                modifier = Modifier.alpha(contentAlpha)
             )
             Text(
                 text = stringResource(id = description),
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.alpha(contentAlpha)
+//                modifier = Modifier.alpha(contentAlpha)
             )
         }
 

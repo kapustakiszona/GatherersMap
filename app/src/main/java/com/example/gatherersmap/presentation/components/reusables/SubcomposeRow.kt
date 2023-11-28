@@ -9,6 +9,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+/**
+Makes it possible to define the same size for elements in one line
+ **/
 @Composable
 fun SubcomposeRow(
     modifier: Modifier = Modifier,

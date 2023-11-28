@@ -1,9 +1,8 @@
 package com.example.gatherersmap.data.network.mapper
 
+import com.example.gatherersmap.data.network.dto.MushroomUpdateRequestDto
 import com.example.gatherersmap.domain.model.ItemSpot
-import com.example.gatherersmap.utils.convertUriToBase64
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.example.gatherersmap.utils.convertBmpUriToBase64
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -16,15 +15,22 @@ data class EditedItemSpot(
     val image: String? = null,
 )
 
-suspend fun compareSpots(oldSpot: ItemSpot, newSpot: ItemSpot): EditedItemSpot {
+fun EditedItemSpot.toMushroomUpdateRequestDto(): MushroomUpdateRequestDto {
+    return MushroomUpdateRequestDto(
+        description = description,
+        id = id,
+        image = image,
+        lat = lat,
+        lng = lng,
+        name = name
+    )
+}
+
+fun compareSpots(oldSpot: ItemSpot, newSpot: ItemSpot): EditedItemSpot {
     val updName = if (oldSpot.name == newSpot.name) null else newSpot.name
     val updDesc = if (oldSpot.description == newSpot.description) null else newSpot.description
-    val updImg = if (oldSpot.image == newSpot.image) null else withContext(Dispatchers.IO) {
-        convertUriToBase64(newSpot.image)
-    }
+    val updImg = if (oldSpot.image == newSpot.image) null else newSpot.image.convertBmpUriToBase64()
     return EditedItemSpot(
-        lat = null,
-        lng = null,
         id = oldSpot.id,
         name = updName,
         description = updDesc,
