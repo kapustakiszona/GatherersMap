@@ -4,8 +4,7 @@
 
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
-import android.annotation.SuppressLint
-import android.util.Log
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
@@ -23,7 +22,6 @@ import com.example.gatherersmap.navigation.AppNavGraph
 import com.example.gatherersmap.navigation.NavigationDestinations
 import com.example.gatherersmap.navigation.NavigationHandler
 import com.example.gatherersmap.navigation.rememberNavigationState
-import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.PickLocationFab
 import com.example.gatherersmap.presentation.main.ui.map.MapScreen
 import com.example.gatherersmap.presentation.main.ui.snackbar.SnackBarNetworkErrorManager
@@ -36,7 +34,6 @@ import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @ExperimentalPermissionsApi
 @Composable
 fun MainScreen(viewModel: MapViewModel) {
@@ -63,7 +60,7 @@ fun MainScreen(viewModel: MapViewModel) {
     )
     {
         ModalBottomSheetLayout(
-            modifier = Modifier,
+            modifier = Modifier.padding(it),
             bottomSheetNavigator = bottomSheetNavigator,
             sheetShape = RoundedCornerShape(
                 topStart = 26.dp,
