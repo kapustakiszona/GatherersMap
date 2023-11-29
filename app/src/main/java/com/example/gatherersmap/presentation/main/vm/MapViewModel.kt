@@ -7,9 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
+import com.example.gatherersmap.data.network.dto.toItemSpot
+import com.example.gatherersmap.data.network.dto.toListItemSpots
 import com.example.gatherersmap.data.network.mapper.compareSpots
-import com.example.gatherersmap.data.network.mapper.toItemSpot
-import com.example.gatherersmap.data.network.mapper.toListItemSpots
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.navigation.NavigationDestinations
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
@@ -18,7 +18,6 @@ import com.example.gatherersmap.utils.NetworkResult
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -111,6 +110,7 @@ class MapViewModel @Inject constructor(
         try {
             when (val result = repository.insertItemSpotRemote(itemSpot)) {
                 is NetworkResult.Error -> {
+                    repository.insertItemSpotLocal(spot = itemSpot)
                     setErrorMessage(
                         error = result.errorMessage,
                         action = {
@@ -124,7 +124,8 @@ class MapViewModel @Inject constructor(
                 is NetworkResult.Success -> {
                     val newItemId = result.data.itemId
                     if (newItemId != null) {
-                        getItemSpot(newItemId)
+                        getItemAndUpdateList(newItemId)
+                        //getAllItemSpots()
                         val newItem = _itemsState.value.itemSpots.find {
                             it.id == newItemId
                         }
@@ -172,7 +173,6 @@ class MapViewModel @Inject constructor(
         insertAndUpdateNetworkProgress = true
         withContext(Dispatchers.IO) {
             val updatedSpot = compareSpots(oldSpot = oldSpot, newSpot = newSpot)
-            delay(2000)
             try {
                 when (val result = repository.updateItemSpotDetailsRemote(updatedSpot)) {
                     is NetworkResult.Error -> {
@@ -187,14 +187,14 @@ class MapViewModel @Inject constructor(
                     }
 
                     is NetworkResult.Success -> {
-                        getItemSpot(oldSpot.id)
-                        val updatedItemSpot =
-                            itemsState.value.itemSpots.find {
-                                (it.id == oldSpot.id)
-                            }
-                        if (updatedItemSpot != null) {
-                            _navigationDestination.update {
-                                NavigationDestinations.Details(updatedItemSpot)
+                        getItemAndUpdateList(oldSpot.id)
+                        itemsState.value.itemSpots.find {
+                            (it.id == oldSpot.id)
+                        }.also {
+                            it?.let { spot ->
+                                _navigationDestination.update {
+                                    NavigationDestinations.Details(spot)
+                                }
                             }
                         }
                     }
@@ -205,7 +205,7 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getItemSpot(itemSpotId: Int) {
+    private suspend fun getItemAndUpdateList(itemSpotId: Int) {
         withContext(Dispatchers.IO) {
             when (val result = repository.getItemSpotRemote(spotId = itemSpotId)) {
                 is NetworkResult.Error -> {
@@ -213,7 +213,7 @@ class MapViewModel @Inject constructor(
                         error = result.errorMessage,
                         action = {
                             viewModelScope.launch {
-                                getItemSpot(itemSpotId)
+                                getItemAndUpdateList(itemSpotId)
                             }
                         }
                     )
@@ -230,16 +230,16 @@ class MapViewModel @Inject constructor(
                             oldList.add(item)
                             _itemsState.update { MapState(oldList) }
                         } else {
-                            val newList = oldList.map {
-                                if (it.id == existItem.id) {
-                                    val a = it.copy(
+                            val newList = oldList.map { oldItem ->
+                                if (oldItem.id == existItem.id) {
+                                    val updItem = oldItem.copy(
                                         name = item.name,
                                         description = item.description,
                                         image = item.image
                                     )
-                                    a
+                                    updItem
                                 } else {
-                                    it
+                                    oldItem
                                 }
                             }
                             _itemsState.update { MapState(newList) }

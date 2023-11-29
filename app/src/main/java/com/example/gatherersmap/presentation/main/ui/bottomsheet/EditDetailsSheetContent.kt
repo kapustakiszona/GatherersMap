@@ -1,6 +1,5 @@
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -19,8 +18,10 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +46,6 @@ import com.example.gatherersmap.presentation.components.CircularProgressBarCompo
 import com.example.gatherersmap.presentation.components.TextFieldComponent
 import com.example.gatherersmap.presentation.components.imagePicker.ImagePicker
 import com.example.gatherersmap.presentation.components.reusables.SubcomposeRow
-import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 
 @Composable
 fun EditDetailsSheetContent(
@@ -62,12 +62,10 @@ fun EditDetailsSheetContent(
         model = ImageRequest.Builder(LocalContext.current)
             .data(tempImage)
             .build(),
-        onError = { error ->
-            //Log.d(TAG, "error: ${error.result.throwable}")
-        },
         fallback = painterResource(R.drawable.image_placeholder),
     )
 
+    val isSaveButtonEnabled by remember { derivedStateOf { modifiedItem != itemSpot } }
 
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
@@ -117,14 +115,15 @@ fun EditDetailsSheetContent(
         }
         Buttons(
             onSaveClicked = {
+                //saves the image from the preview into an object that will be saved
                 modifiedItem = modifiedItem.copy(image = tempImage)
                 onSaveClicked(modifiedItem)
-                Log.d(TAG, "EditDetailsSheetContent: save clicked")
             },
             onCancelClicked = {
                 onCancelClicked(itemSpot)
             },
-            progressState = insertAndUpdateNetworkProgress
+            progressState = insertAndUpdateNetworkProgress,
+            isOnSaveEnabled = isSaveButtonEnabled
         )
     }
 }
@@ -135,6 +134,7 @@ private fun Buttons(
     onSaveClicked: () -> Unit,
     onCancelClicked: () -> Unit,
     progressState: Boolean,
+    isOnSaveEnabled: Boolean
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -151,6 +151,9 @@ private fun Buttons(
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 6.dp,
                     pressedElevation = 2.dp
+                ),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
             ) {
                 Icon(
@@ -169,7 +172,7 @@ private fun Buttons(
             ElevatedButton(
                 modifier = Modifier,
                 onClick = { onSaveClicked() },
-                enabled = !progressState,
+                enabled = !progressState && isOnSaveEnabled,
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 6.dp,
                     pressedElevation = 2.dp

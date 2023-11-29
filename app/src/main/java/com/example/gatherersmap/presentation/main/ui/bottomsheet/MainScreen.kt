@@ -4,7 +4,7 @@
 
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
-import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import com.example.gatherersmap.data.network.mapper.compareSpots
 import com.example.gatherersmap.navigation.AppNavGraph
 import com.example.gatherersmap.navigation.NavigationDestinations
 import com.example.gatherersmap.navigation.NavigationHandler
@@ -35,7 +34,6 @@ import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterialNavigationApi::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @ExperimentalPermissionsApi
 @Composable
 fun MainScreen(viewModel: MapViewModel) {
@@ -62,7 +60,7 @@ fun MainScreen(viewModel: MapViewModel) {
     )
     {
         ModalBottomSheetLayout(
-            modifier = Modifier,
+            modifier = Modifier.padding(it),
             bottomSheetNavigator = bottomSheetNavigator,
             sheetShape = RoundedCornerShape(
                 topStart = 26.dp,
@@ -144,9 +142,10 @@ fun MainScreen(viewModel: MapViewModel) {
                         },
                         onSaveClicked = { editedItemSpot ->
                             coroutineScope.launch {
-                                // TODO: прогрессбар начинается не сразу после нажатия
-                                val updatedSpot = compareSpots(currentItem, editedItemSpot)
-                                viewModel.updateItemSpot(updatedSpot)
+                                viewModel.updateItemSpot(
+                                    oldSpot = currentItem,
+                                    newSpot = editedItemSpot
+                                )
                             }
                         },
                         insertAndUpdateNetworkProgress = viewModel.insertAndUpdateNetworkProgress,

@@ -8,7 +8,7 @@ data class ItemSpotEntity(
     val lat: Double,
     val lng: Double,
     @PrimaryKey(autoGenerate = true) val id: Int,
-    var name: String? = null,
-    var description: String? = null,
-    var image: String? = null
+    val name: String? = null,
+    val description: String? = null,
+    val image: String? = null,
 )
