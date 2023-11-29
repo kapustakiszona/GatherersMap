@@ -2,6 +2,7 @@ package com.example.gatherersmap.presentation.components.imagePicker
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import com.example.gatherersmap.R
 import com.example.gatherersmap.presentation.components.VanishingButtonComponent
+import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 
 @Composable
 fun ImagePicker(
@@ -78,6 +80,7 @@ fun ImagePicker(
             onImagePick(imageUri.toString())
         } else if (hasCameraImage && imageUri != null) {
             onImagePick(imageUri.toString())
+            Log.d(TAG, "ImagePicker: camera image ${imageUri.toString()}")
         }
     }
 }

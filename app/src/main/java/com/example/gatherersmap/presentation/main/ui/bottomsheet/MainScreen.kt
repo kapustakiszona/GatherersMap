@@ -1,97 +1,157 @@
+@file:OptIn(
+    ExperimentalMaterialNavigationApi::class
+)
+
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
-import android.util.Log
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomSheetScaffold
-import androidx.compose.material.BottomSheetValue
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FabPosition
-import androidx.compose.material.rememberBottomSheetScaffoldState
-import androidx.compose.material.rememberBottomSheetState
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.gatherersmap.data.ItemSpotDatabase
-import com.example.gatherersmap.data.ItemSpotRepositoryImpl
-import com.example.gatherersmap.navigation.BottomSheetScreenState
-import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
-import com.example.gatherersmap.presentation.main.ui.map.MapEvent
+import androidx.navigation.compose.rememberNavController
+import com.example.gatherersmap.navigation.AppNavGraph
+import com.example.gatherersmap.navigation.NavigationDestinations
+import com.example.gatherersmap.navigation.NavigationHandler
+import com.example.gatherersmap.navigation.rememberNavigationState
+import com.example.gatherersmap.presentation.main.ui.PickLocationFab
 import com.example.gatherersmap.presentation.main.ui.map.MapScreen
+import com.example.gatherersmap.presentation.main.ui.snackbar.SnackBarNetworkErrorManager
 import com.example.gatherersmap.presentation.main.vm.MapViewModel
-import com.example.gatherersmap.presentation.main.vm.MapViewModelFactory
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.google.accompanist.navigation.material.ModalBottomSheetLayout
+import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterialNavigationApi::class)
 @ExperimentalPermissionsApi
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun MainScreen() {
-    val viewModel: MapViewModel =
-        viewModel(
-            factory = MapViewModelFactory(
-                ItemSpotRepositoryImpl(
-                    ItemSpotDatabase
-                )
-            )
-        )
-    val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberBottomSheetState(BottomSheetValue.Collapsed)
-    )
-    val sheetScreenState =
-        viewModel.sheetState.collectAsState(BottomSheetScreenState.Initial)
-    val snackBarHostState = scaffoldState.snackbarHostState
+fun MainScreen(viewModel: MapViewModel) {
+    val loadingState = viewModel.getAllNetworkProgress
     val coroutineScope = rememberCoroutineScope()
-    var isFabClicked by remember { mutableStateOf(false) }
-
-    BottomSheetScaffold(
-        modifier = Modifier,
-        scaffoldState = scaffoldState,
-        sheetShape = RoundedCornerShape(
-            topStart = 26.dp,
-            topEnd = 26.dp
-        ),
-        sheetPeekHeight = 0.dp,
-        sheetElevation = 20.dp,
+    val bottomSheetNavigator = rememberBottomSheetNavigator()
+    val navController = rememberNavController(bottomSheetNavigator)
+    val navigationState = rememberNavigationState(navController)
+    val snackbarHostState = remember { SnackbarHostState() }
+    val navDest = viewModel.navigationDestination.collectAsState()
+    Scaffold(
+        floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
-            MyLocation(
-                snackBarHostState = snackBarHostState,
-                isFabClicked = {
-                    isFabClicked = it
-                    Log.d(TAG, "fab clicked $it")
+            PickLocationFab(
+                navigationState = navigationState,
+                loadingState = loadingState,
+                addNewItemSpot = { latLng ->
+                    viewModel.setTemporalMarker(latLng)
+                    navigationState.navigateToAddItem(latLng)
                 }
             )
         },
-        floatingActionButtonPosition = FabPosition.End,
-        sheetContent = {
-            BottomSheetContent(
-                currentSheetState = sheetScreenState.value,
-                scaffoldState = scaffoldState,
-                coroutineScope = coroutineScope,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    )
+    {
+        ModalBottomSheetLayout(
+            modifier = Modifier.padding(it),
+            bottomSheetNavigator = bottomSheetNavigator,
+            sheetShape = RoundedCornerShape(
+                topStart = 26.dp,
+                topEnd = 26.dp
+            ),
+            sheetElevation = 20.dp,
+            scrimColor = Color.Unspecified
+        )
+        {
+            SnackBarNetworkErrorManager(
+                networkErrorFlow = viewModel.networkErrorFlow,
+                snackbarHostState = snackbarHostState
+            )
+            NavigationHandler(
+                navigationDestination = navDest.value,
+                navigationState = navigationState,
+            )
+            AppNavGraph(
+                navHostController = navController,
+                mapScreenContent = {
+                    MapScreen(
+                        onMapClick = {
+                            viewModel.setNavigationDestination(NavigationDestinations.Map)
+                            viewModel.removeTemporalMarker()
+                        },
+                        onAddMarkerLongClick = { latLng ->
+                            viewModel.setTemporalMarker(latLng)
+                            viewModel.setNavigationDestination(NavigationDestinations.Add(latLng))
+                        },
+                        onMarkerClick = { itemSpot ->
+                            viewModel.setNavigationDestination(
+                                NavigationDestinations.Details(
+                                    itemSpot
+                                )
+                            )
+                        },
+                        viewModel = viewModel
+                    )
+                },
+                detailsItemBottSheetContent = { currentItemSpot ->
+                    DetailsSheetContent(
+                        itemSpot = currentItemSpot,
+                        onEditClickListener = { itemSpot ->
+                            viewModel.setNavigationDestination(NavigationDestinations.Edit(itemSpot))
+                        },
+                        onDeleteClickListener = { itemSpot ->
+                            coroutineScope.launch {
+                                viewModel.deleteItemSpot(itemSpotId = itemSpot.id)
+                            }
+                        },
+                        deleteProgress = viewModel.deleteNetworkProgress
+                    )
+                },
+                addItemBottSheetContent = { newMarker ->
+                    EditDetailsSheetContent(
+                        itemSpot = newMarker,
+                        onCancelClicked = {
+                            // TODO: удалить темпМаркер при нажатии "назад"
+                            viewModel.setNavigationDestination(NavigationDestinations.Map)
+                            viewModel.removeTemporalMarker()
+                        },
+                        onSaveClicked = { itemSpot ->
+                            coroutineScope.launch {
+                                viewModel.insertItemSpot(itemSpot)
+                            }
+                        },
+                        insertAndUpdateNetworkProgress = viewModel.insertAndUpdateNetworkProgress,
+                    )
+                },
+                editItemBottSheetContent = { currentItem ->
+                    EditDetailsSheetContent(
+                        itemSpot = currentItem,
+                        onCancelClicked = { itemSpot ->
+                            viewModel.setNavigationDestination(
+                                NavigationDestinations.Details(
+                                    itemSpot
+                                )
+                            )
+                        },
+                        onSaveClicked = { editedItemSpot ->
+                            coroutineScope.launch {
+                                viewModel.updateItemSpot(
+                                    oldSpot = currentItem,
+                                    newSpot = editedItemSpot
+                                )
+                            }
+                        },
+                        insertAndUpdateNetworkProgress = viewModel.insertAndUpdateNetworkProgress,
+                    )
+                }
             )
         }
-    ) {
-        MapScreen(
-            onMapClick = {
-                sheetScreenState.value.hideSheet(
-                    scaffoldState = scaffoldState,
-                    scope = coroutineScope
-                )
-                viewModel.onEvent(MapEvent.Initial)
-            },
-            onAddMarkerLongClick = {
-                viewModel.onEvent(MapEvent.OnAddItemLongClick(it))
-            },
-            onMarkerClick = {
-                viewModel.onEvent(MapEvent.OnDetailsItemClick(it))
-            },
-            isFabClicked = isFabClicked
-        )
     }
 }

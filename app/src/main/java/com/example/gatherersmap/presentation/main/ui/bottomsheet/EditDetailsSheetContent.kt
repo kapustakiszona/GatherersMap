@@ -1,9 +1,8 @@
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
-import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,8 +15,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,71 +30,69 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.gatherersmap.R
 import com.example.gatherersmap.domain.model.ItemSpot
-import com.example.gatherersmap.presentation.components.GradientButtonComponent
+import com.example.gatherersmap.presentation.components.CircularProgressBarComponent
 import com.example.gatherersmap.presentation.components.TextFieldComponent
 import com.example.gatherersmap.presentation.components.imagePicker.ImagePicker
-import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
+import com.example.gatherersmap.presentation.components.reusables.SubcomposeRow
 
 @Composable
 fun EditDetailsSheetContent(
     itemSpot: ItemSpot,
     onSaveClicked: (ItemSpot) -> Unit,
     onCancelClicked: (ItemSpot) -> Unit,
+    insertAndUpdateNetworkProgress: Boolean,
 ) {
-    val modifiedItem by remember { mutableStateOf(itemSpot) }
+    var modifiedItem by remember { mutableStateOf(itemSpot) }
     var tempImage by rememberSaveable { mutableStateOf(itemSpot.image) }
     var newName by rememberSaveable { mutableStateOf(itemSpot.name) }
     var newDescription by rememberSaveable { mutableStateOf(itemSpot.description) }
-
     val painter = rememberAsyncImagePainter(
         model = ImageRequest.Builder(LocalContext.current)
             .data(tempImage)
             .build(),
-        onError = { error ->
-            Log.d(TAG, "error: ${error.result.throwable}")
-        },
         fallback = painterResource(R.drawable.image_placeholder),
     )
 
+    val isSaveButtonEnabled by remember { derivedStateOf { modifiedItem != itemSpot } }
 
     Column(
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-//            .paint(
-//                painter = painterResource(R.drawable.mooshrooms),
-//                contentScale = ContentScale.Inside,
-//            )
-            .padding(start = 20.dp, top = 10.dp, end = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        CircularProgressBarComponent(insertAndUpdateNetworkProgress)
+
         TextFieldComponent(
             currentValue = newName,
             modifiedValue = { newValue ->
                 newName = newValue
-                modifiedItem.name = newName
+                modifiedItem = modifiedItem.copy(name = newName)
             },
-            label = "Name"
+            label = "Mushroom Name"
         )
         TextFieldComponent(
             currentValue = newDescription,
             modifiedValue = { newValue ->
                 newDescription = newValue
-                modifiedItem.description = newDescription
+                modifiedItem = modifiedItem.copy(description = newDescription)
             },
             label = "Description"
         )
-        Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier
+                .padding(8.dp)
                 .border(
                     width = 1.dp,
                     color = Color.Gray,
@@ -99,8 +101,8 @@ fun EditDetailsSheetContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             ImagePicker(
-                onImagePick = {
-                    tempImage = it
+                onImagePick = { uri ->
+                    tempImage = uri
                 }
             )
             Spacer(modifier = Modifier.width(6.dp))
@@ -111,15 +113,17 @@ fun EditDetailsSheetContent(
                 contentScale = ContentScale.FillBounds
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
         Buttons(
             onSaveClicked = {
-                modifiedItem.image = tempImage
+                //saves the image from the preview into an object that will be saved
+                modifiedItem = modifiedItem.copy(image = tempImage)
                 onSaveClicked(modifiedItem)
             },
             onCancelClicked = {
                 onCancelClicked(itemSpot)
-            }
+            },
+            progressState = insertAndUpdateNetworkProgress,
+            isOnSaveEnabled = isSaveButtonEnabled
         )
     }
 }
@@ -129,37 +133,65 @@ fun EditDetailsSheetContent(
 private fun Buttons(
     onSaveClicked: () -> Unit,
     onCancelClicked: () -> Unit,
+    progressState: Boolean,
+    isOnSaveEnabled: Boolean
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-
+        SubcomposeRow(
+            paddingBetween = 20.dp
         ) {
-            GradientButtonComponent(
-                onClick = {
-                    onCancelClicked()
-                },
-                iconVector = Icons.Outlined.Close,
-                text = "Cancel",
-                gradientColors = listOf(
-                    MaterialTheme.colorScheme.primary,
-                    MaterialTheme.colorScheme.primaryContainer
+            ElevatedButton(
+                contentPadding = ButtonDefaults.ContentPadding,
+                modifier = Modifier,
+                onClick = { onCancelClicked() },
+                enabled = !progressState,
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 6.dp,
+                    pressedElevation = 2.dp
+                ),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            GradientButtonComponent(
-                onClick = {
-                    onSaveClicked()
-                },
-                iconVector = Icons.Outlined.Check,
-                text = "Save",
-                gradientColors = listOf(
-                    MaterialTheme.colorScheme.primaryContainer,
-                    MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = null,
+                    modifier = Modifier.size(ButtonDefaults.IconSize)
                 )
-            )
+                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                Text(
+                    text = "Cancel",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.SansSerif,
+                )
+            }
+            ElevatedButton(
+                modifier = Modifier,
+                onClick = { onSaveClicked() },
+                enabled = !progressState && isOnSaveEnabled,
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 6.dp,
+                    pressedElevation = 2.dp
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                )
+                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                Text(
+                    text = "Save",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.SansSerif,
+                )
+            }
         }
+        Spacer((Modifier.height(12.dp)))
     }
 }

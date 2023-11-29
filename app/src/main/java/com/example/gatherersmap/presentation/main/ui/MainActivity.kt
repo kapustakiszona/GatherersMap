@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.gatherersmap.presentation.main.ui.bottomsheet.MainScreen
+import com.example.gatherersmap.presentation.main.vm.MapViewModel
 import com.example.gatherersmap.theme.AppTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.android.gms.maps.model.LatLng
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +25,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreen()
+                    val viewModel: MapViewModel = hiltViewModel()
+                    MainScreen(viewModel)
                 }
             }
         }
@@ -30,7 +34,6 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val TAG = "OTAG"
-        val sydney = LatLng(-33.865143, 151.209900)
     }
 
 }

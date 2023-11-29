@@ -2,9 +2,11 @@ package com.example.gatherersmap.presentation.components.imagePicker
 
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import androidx.core.content.FileProvider
 import com.example.gatherersmap.R
 import java.io.File
+import java.io.FileOutputStream
 
 class ComposeFileProvider : FileProvider(
     R.xml.file_path
@@ -19,7 +21,8 @@ class ComposeFileProvider : FileProvider(
                 ".jpg",
                 directory
             )
-            val authority = context.packageName + ".presentation.components.imagePicker.ComposeFileProvider"
+            val authority =
+                context.packageName + ".presentation.components.imagePicker.ComposeFileProvider"
             return getUriForFile(context, authority, file)
         }
     }
