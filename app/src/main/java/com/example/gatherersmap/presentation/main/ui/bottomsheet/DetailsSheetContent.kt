@@ -1,15 +1,18 @@
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 
-import android.util.Log
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
@@ -22,7 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,18 +34,37 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import com.example.gatherersmap.R
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.presentation.components.CircularProgressBarComponent
 import com.example.gatherersmap.presentation.components.DeletingDialogComposable
 import com.example.gatherersmap.presentation.components.reusables.SubcomposeRow
-import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
-import com.example.gatherersmap.presentation.main.vm.MapViewModel
+
+@Composable
+@Preview
+fun DetailsPreview() {
+    DetailsSheetContent(
+        itemSpot = ItemSpot(
+            name = "Mushroom",
+            lat = 1.1,
+            description = "Some text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this itemSome text about this item",
+            lng = 1.1,
+            image = R.drawable.image_placeholder.toString()
+        ),
+        onEditClickListener = {},
+        onDeleteClickListener = {},
+        deleteProgress = false,
+        onImageClick = {}
+    )
+}
 
 @Composable
 fun DetailsSheetContent(
@@ -50,28 +72,47 @@ fun DetailsSheetContent(
     onEditClickListener: (ItemSpot) -> Unit,
     onDeleteClickListener: (ItemSpot) -> Unit,
     deleteProgress: Boolean,
+    onImageClick: (ItemSpot) -> Unit
 ) {
+    var isDescriptionExpanded by rememberSaveable {
+        mutableStateOf(false)
+    }
+
     Column(
-        modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp),
+        modifier = Modifier
+            .padding(start = 20.dp, top = 10.dp, end = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (deleteProgress) {
             CircularProgressBarComponent(true)
         }
-        Text(text = "${itemSpot.name}  id:${itemSpot.id}", fontSize = 26.sp)
+        Text(text = itemSpot.name, fontSize = 26.sp)
         Text(
+            modifier = Modifier
+                .animateContentSize(animationSpec = tween(100))
+                .clickable {
+                    isDescriptionExpanded = !isDescriptionExpanded
+                },
             text = itemSpot.description,
             fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = if (isDescriptionExpanded) Int.MAX_VALUE else 1
         )
+//        Text(text = "  id:${itemSpot.id}", fontSize = 8.sp)
         Spacer(Modifier.height(10.dp))
-        Log.d(TAG, "DetailsSheetContent: details image ->> ${itemSpot.image}")
         SubcomposeAsyncImage(
-            modifier = Modifier.clip(RoundedCornerShape(10.dp)).size(200.dp),
+            modifier = Modifier
+                .clip(RoundedCornerShape(10.dp))
+                .aspectRatio(3f / 2f)
+                .clickable {
+                    onImageClick(itemSpot)
+                },
             model = ImageRequest.Builder(LocalContext.current)
                 .data(itemSpot.image)
                 .build(),
             contentDescription = null,
+            contentScale = ContentScale.Crop,
             loading = {
                 Box(
                     modifier = Modifier.size(40.dp),
@@ -89,8 +130,7 @@ fun DetailsSheetContent(
                 ) {
                     Text(text = "Oops, something went wrong")
                 }
-            },
-            contentScale = ContentScale.FillBounds
+            }
         )
         Spacer(Modifier.height(10.dp))
         Buttons(
@@ -118,7 +158,7 @@ private fun Buttons(
         SubcomposeRow(
             paddingBetween = 20.dp
         ) {
-            var showDialog by remember { mutableStateOf(false) }
+            var showDialog by rememberSaveable { mutableStateOf(false) }
             if (showDialog) {
                 DeletingDialogComposable(
                     onDeleteItem = {
@@ -132,44 +172,57 @@ private fun Buttons(
                 modifier = Modifier,
                 onClick = { onEditClickListener() },
                 enabled = !loadingInProgress,
+                shape = MaterialTheme.shapes.small,
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 6.dp,
                     pressedElevation = 2.dp
+                ),
+                border = BorderStroke(
+                    width = 0.5.dp,
+                    color = MaterialTheme.colorScheme.inversePrimary
                 )
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Edit,
                     contentDescription = null,
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                    modifier = Modifier
                 )
-                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                 Text(
                     text = "Edit",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Normal,
                     fontFamily = FontFamily.SansSerif,
+                    letterSpacing = TextUnit(3f, TextUnitType.Sp),
                 )
             }
+
             ElevatedButton(
                 modifier = Modifier,
                 onClick = { showDialog = true },
                 enabled = !loadingInProgress,
+                shape = MaterialTheme.shapes.small,
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 6.dp,
                     pressedElevation = 2.dp
+                ),
+                border = BorderStroke(
+                    width = 0.5.dp,
+                    color = MaterialTheme.colorScheme.inversePrimary
                 )
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Delete,
                     contentDescription = null,
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                    modifier = Modifier
                 )
-                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                 Text(
                     text = "Delete",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Normal,
                     fontFamily = FontFamily.SansSerif,
+                    letterSpacing = TextUnit(3f, TextUnitType.Sp),
                 )
             }
         }

@@ -10,7 +10,7 @@ sealed class ScreenState(val route: String) {
 
     object GoogleMap : ScreenState(route = ROUTE_MAIN_MAP)
 
-    object BottSheetHome : ScreenState(route = ROUTE_BOTT_SHEET_HOME) {
+    data object BottomSheet : ScreenState(route = ROUTE_BOTT_SHEET_HOME) {
         object Add : ScreenState(route = ROUTE_ADD_ITEM) {
             private const val ROUTE_FOR_ARGS = "add_item"
             fun getRouteWithArgs(latLng: LatLng): String {
@@ -20,7 +20,7 @@ sealed class ScreenState(val route: String) {
             }
         }
 
-        object Edit : ScreenState(route = ROUTE_EDIT_ITEM) {
+        data object Edit : ScreenState(route = ROUTE_EDIT_ITEM) {
             private const val ROUTE_FOR_ARGS = "edit_item"
             fun getRouteWithArgs(itemSpot: ItemSpot): String {
                 val itemSpotJson = Json.encodeToJsonElement(itemSpot).toString()
@@ -28,8 +28,17 @@ sealed class ScreenState(val route: String) {
             }
         }
 
-        object Details : ScreenState(route = ROUTE_DETAILS_ITEM) {
+        data object Details : ScreenState(route = ROUTE_DETAILS_ITEM) {
             private const val ROUTE_FOR_ARGS = "details_item"
+
+            fun getRouteWithArgs(itemSpot: ItemSpot): String {
+                val itemSpotJson = Json.encodeToJsonElement(itemSpot).toString()
+                return "$ROUTE_FOR_ARGS/${itemSpotJson.encode()}"
+            }
+        }
+
+        data object Image : ScreenState(route = ROUTE_DETAILS_IMAGE) {
+            private const val ROUTE_FOR_ARGS = "details_item_image"
 
             fun getRouteWithArgs(itemSpot: ItemSpot): String {
                 val itemSpotJson = Json.encodeToJsonElement(itemSpot).toString()
@@ -40,6 +49,7 @@ sealed class ScreenState(val route: String) {
 
     companion object {
         const val KEY_ITEM_SPOT = "item_spot"
+        const val KEY_ITEM_IMAGE = "item_image"
         const val KEY_LAT_LNG_MARKER = "new_latlng"
 
         const val ROUTE_MAIN_MAP = "google_map"
@@ -47,6 +57,7 @@ sealed class ScreenState(val route: String) {
         const val ROUTE_ADD_ITEM = "add_item/{$KEY_LAT_LNG_MARKER}"
         const val ROUTE_EDIT_ITEM = "edit_item/{$KEY_ITEM_SPOT}"
         const val ROUTE_DETAILS_ITEM = "details_item/{$KEY_ITEM_SPOT}"
+        const val ROUTE_DETAILS_IMAGE = "details_item_image/{$KEY_ITEM_IMAGE}"
     }
 
     fun String.encode(): String {

@@ -44,11 +44,11 @@ fun MapScreen(
     val itemsState by viewModel.itemsState.collectAsState()
     val tempMarkerFlow by viewModel.temporalMarker.collectAsState()
     val oldMarkersList: MutableList<Marker>? = null
-    val cameraPositionState =
-        rememberCameraPositionState()
+    val cameraPositionState = rememberCameraPositionState()
     var uiSettings by remember { mutableStateOf(MapUiSettings(zoomControlsEnabled = false)) }
     var properties by remember { mutableStateOf(MapProperties()) }
     var isMapReady by remember { mutableStateOf(false) }
+
 
     Box(contentAlignment = Alignment.TopStart) {
         GoogleMap(
@@ -63,6 +63,7 @@ fun MapScreen(
                 onMapClick()
             },
             onMapLoaded = {
+                Log.d(TAG, "MapScreen: onMapLoaded")
                 isMapReady = true
             },
             onMyLocationButtonClick = {

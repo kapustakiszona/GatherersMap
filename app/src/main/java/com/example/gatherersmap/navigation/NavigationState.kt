@@ -1,12 +1,10 @@
 package com.example.gatherersmap.navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.gatherersmap.domain.model.ItemSpot
-import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.google.android.gms.maps.model.LatLng
 
 class NavigationState(
@@ -14,76 +12,61 @@ class NavigationState(
 ) {
     fun navigateToDetails(itemSpot: ItemSpot) {
         navHostController.navigate(
-            ScreenState.BottSheetHome.Details.getRouteWithArgs(
+            ScreenState.BottomSheet.Details.getRouteWithArgs(
                 itemSpot
             )
         ) {
-            popUpTo(navHostController.graph.startDestinationId) {
-                saveState = true
-            }
             launchSingleTop = true
+            restoreState = true
         }
     }
 
     fun navigateToAddItem(latLng: LatLng) {
-        navHostController.navigate(ScreenState.BottSheetHome.Add.getRouteWithArgs(latLng)) {
-//            popUpTo(navHostController.graph.startDestinationId) {
-//                saveState = true
-//            }
-//            launchSingleTop = true
+        navHostController.navigate(ScreenState.BottomSheet.Add.getRouteWithArgs(latLng)) {
+            popUpTo(ScreenState.GoogleMap.route)
         }
     }
 
-    fun navigateToEditItem(itemSpot: ItemSpot) { //navigateUp
+    fun navigateToEditItem(itemSpot: ItemSpot) {
         navHostController.navigate(
-            ScreenState.BottSheetHome.Edit.getRouteWithArgs(
+            ScreenState.BottomSheet.Edit.getRouteWithArgs(
                 itemSpot = itemSpot
             )
         ) {
-            popUpTo(navHostController.graph.startDestinationId) {
+            popUpTo(route = ScreenState.BottomSheet.Details.getRouteWithArgs(itemSpot)) {
                 saveState = true
             }
+            restoreState = true
             launchSingleTop = true
         }
     }
 
     fun navigateToMap() {
-        if (navHostController.currentBackStack.value.isNotEmpty()) {
-            navHostController.popBackStack(
-                route = ScreenState.GoogleMap.route,
-                inclusive = false
-            )
+        navHostController.popBackStack(
+            route = ScreenState.GoogleMap.route,
+            inclusive = false
+        )
+    }
+
+    fun navigateToDetailsImage(itemSpot: ItemSpot) {
+        navHostController.navigate(
+            ScreenState.BottomSheet.Image.getRouteWithArgs(itemSpot)
+        ) {
+            popUpTo(navHostController.graph.startDestinationId) {
+                saveState = true
+                inclusive = true
+            }
         }
     }
-}
 
-@Composable
-fun NavigationHandler(
-    navigationDestination: NavigationDestinations,
-    navigationState: NavigationState,
-) {
-    when (navigationDestination) {
-        is NavigationDestinations.Add -> {
-            Log.d(TAG, "NavigationHandler: navigate to add")
-            navigationState.navigateToAddItem(navigationDestination.latLng)
+    fun navigateBackFromImage(itemSpot: ItemSpot) {
+        navHostController.navigate(
+            ScreenState.GoogleMap.route
+        ) {
+            popUpTo(ScreenState.BottomSheet.Details.getRouteWithArgs(itemSpot))
+            launchSingleTop = true
+            restoreState = true
         }
-
-        is NavigationDestinations.Details -> {
-            Log.d(TAG, "NavigationHandler: navigate to details")
-            navigationState.navigateToDetails(navigationDestination.itemSpot)
-        }
-
-        is NavigationDestinations.Edit -> {
-            Log.d(TAG, "NavigationHandler: navigate to edit")
-            navigationState.navigateToEditItem(navigationDestination.itemSpot)
-        }
-
-        is NavigationDestinations.Map -> {
-            Log.d(TAG, "NavigationHandler: navigate to map")
-            navigationState.navigateToMap()
-        }
-
-        is NavigationDestinations.Current -> {}
     }
 }
 

@@ -1,4 +1,4 @@
-package com.example.gatherersmap.presentation.main.ui
+package com.example.gatherersmap.presentation.main.ui.map
 
 import android.util.Log
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,11 +8,11 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.gatherersmap.navigation.NavigationState
+import androidx.navigation.NavBackStackEntry
 import com.example.gatherersmap.navigation.ScreenState
 import com.example.gatherersmap.presentation.components.CircularProgressBarComponent
 import com.example.gatherersmap.presentation.components.reusables.ANIMATION_TIME_HALF_SEC
@@ -25,12 +25,13 @@ import com.google.android.gms.maps.model.LatLng
 @Composable
 fun PickLocationFab(
     modifier: Modifier = Modifier,
-    navigationState: NavigationState,
+  //  navigationState: NavigationState,
+    navBackStackEntry: State<NavBackStackEntry?>,
     loadingState: Boolean,
     addNewItemSpot: (LatLng) -> Unit,
 ) {
     val context = LocalContext.current
-    val navBackStackEntry = navigationState.navHostController.currentBackStackEntryAsState()
+    //val navBackStackEntry = navigationState.navHostController.currentBackStackEntryAsState()
     val visibility = (navBackStackEntry.value?.destination?.route == ScreenState.GoogleMap.route)
     AnimatedScaleInTransitionForFab(
         visible = visibility,
