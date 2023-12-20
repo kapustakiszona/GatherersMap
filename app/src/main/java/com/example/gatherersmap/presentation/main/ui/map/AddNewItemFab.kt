@@ -8,32 +8,22 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavBackStackEntry
-import com.example.gatherersmap.navigation.ScreenState
 import com.example.gatherersmap.presentation.components.CircularProgressBarComponent
 import com.example.gatherersmap.presentation.components.reusables.ANIMATION_TIME_HALF_SEC
 import com.example.gatherersmap.presentation.components.reusables.ANIMATION_TIME_QTR_SEC
-import com.example.gatherersmap.presentation.components.reusables.AnimatedScaleInTransitionForFab
-import com.example.gatherersmap.presentation.location.locationService
+import com.example.gatherersmap.presentation.components.reusables.AnimatedScaleInTransition
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
-import com.google.android.gms.maps.model.LatLng
 
 @Composable
-fun PickLocationFab(
+fun AddNewItemFab(
     modifier: Modifier = Modifier,
-  //  navigationState: NavigationState,
-    navBackStackEntry: State<NavBackStackEntry?>,
+    visibility: Boolean,
     loadingState: Boolean,
-    addNewItemSpot: (LatLng) -> Unit,
+    onClick: () -> Unit
 ) {
-    val context = LocalContext.current
-    //val navBackStackEntry = navigationState.navHostController.currentBackStackEntryAsState()
-    val visibility = (navBackStackEntry.value?.destination?.route == ScreenState.GoogleMap.route)
-    AnimatedScaleInTransitionForFab(
+    AnimatedScaleInTransition(
         visible = visibility,
         animateDurationExit = ANIMATION_TIME_QTR_SEC,
         animateDurationEnter = ANIMATION_TIME_HALF_SEC
@@ -47,16 +37,7 @@ fun PickLocationFab(
                 text = { Text(text = "New mushroom") },
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
                 shape = RoundedCornerShape(15.dp),
-                onClick = {
-                    locationService(context) { currentLocation ->
-                        addNewItemSpot(
-                            LatLng(
-                                currentLocation.latitude,
-                                currentLocation.longitude
-                            )
-                        )
-                    }
-                },
+                onClick = onClick,
             )
         }
     }

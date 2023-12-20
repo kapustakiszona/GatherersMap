@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.gatherersmap.R
 import com.example.gatherersmap.domain.model.ItemSpot
@@ -110,6 +111,8 @@ fun DetailsSheetContent(
                 },
             model = ImageRequest.Builder(LocalContext.current)
                 .data(itemSpot.image)
+                .diskCacheKey(itemSpot.image)
+                .diskCachePolicy(CachePolicy.ENABLED)
                 .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,

@@ -45,6 +45,8 @@ class MapViewModel @Inject constructor(
     var deleteNetworkProgress by mutableStateOf(false)
     var insertAndUpdateNetworkProgress by mutableStateOf(false)
 
+    var fabLocationVisibility by mutableStateOf(false)
+
     init {
         Log.d(TAG, "INIT wm: ")
         viewModelScope.launch(Dispatchers.IO) {
@@ -203,6 +205,10 @@ class MapViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun setFabVisibility(isItGoogleMapRoute: Boolean) {
+        fabLocationVisibility = isItGoogleMapRoute
     }
 
     fun setTemporalMarker(latLng: LatLng) {

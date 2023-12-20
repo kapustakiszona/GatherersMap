@@ -21,6 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.presentation.components.CircularProgressBarComponent
@@ -45,6 +46,8 @@ fun ImageViewerComponent(itemSpot: ItemSpot, backClick: () -> Unit) {
                 .zoomable(state),
             model = ImageRequest.Builder(LocalContext.current)
                 .data(itemSpot.image)
+                .diskCacheKey(itemSpot.image)
+                .diskCachePolicy(CachePolicy.ENABLED)
                 .build(),
             contentDescription = null,
             loading = {

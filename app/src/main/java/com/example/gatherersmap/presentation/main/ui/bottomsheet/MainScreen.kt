@@ -6,7 +6,6 @@ package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -23,7 +22,6 @@ import com.example.gatherersmap.navigation.AppNavGraph
 import com.example.gatherersmap.navigation.ScreenState
 import com.example.gatherersmap.navigation.rememberNavigationState
 import com.example.gatherersmap.presentation.main.ui.map.MapScreen
-import com.example.gatherersmap.presentation.main.ui.map.PickLocationFab
 import com.example.gatherersmap.presentation.main.ui.snackbar.SnackBarNetworkErrorManager
 import com.example.gatherersmap.presentation.main.vm.MapViewModel
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
@@ -37,7 +35,6 @@ import kotlinx.coroutines.launch
 @ExperimentalPermissionsApi
 @Composable
 fun MainScreen(viewModel: MapViewModel = hiltViewModel()) {
-    val loadingState = viewModel.getAllNetworkProgress
     val coroutineScope = rememberCoroutineScope()
     val bottomSheetNavigator = rememberBottomSheetNavigator()
     val navController = rememberNavController(bottomSheetNavigator)
@@ -45,21 +42,10 @@ fun MainScreen(viewModel: MapViewModel = hiltViewModel()) {
     val snackbarHostState = remember { SnackbarHostState() }
     val navBackStackEntry = navigationState.navHostController.currentBackStackEntryAsState()
 
-
+    viewModel.setFabVisibility(navBackStackEntry.value?.destination?.route == ScreenState.GoogleMap.route)
     if (navBackStackEntry.value?.destination?.route == ScreenState.GoogleMap.route) viewModel.removeTemporalMarker()
 
     Scaffold(
-        floatingActionButtonPosition = FabPosition.Center,
-        floatingActionButton = {
-            PickLocationFab(
-                navBackStackEntry = navBackStackEntry,
-                loadingState = loadingState,
-                addNewItemSpot = { latLng ->
-                    viewModel.setTemporalMarker(latLng)
-                    navigationState.navigateToAddItem(latLng)
-                }
-            )
-        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     )
     {
@@ -92,6 +78,10 @@ fun MainScreen(viewModel: MapViewModel = hiltViewModel()) {
                         onMarkerClick = { itemSpot ->
                             viewModel.removeTemporalMarker()
                             navigationState.navigateToDetails(itemSpot)
+                        },
+                        pickCurrentLocation = { latLng ->
+                            viewModel.setTemporalMarker(latLng)
+                            navigationState.navigateToAddItem(latLng)
                         },
                         viewModel = viewModel
                     )
