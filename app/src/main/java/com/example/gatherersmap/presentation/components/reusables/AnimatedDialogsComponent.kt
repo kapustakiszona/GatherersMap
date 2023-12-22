@@ -64,6 +64,7 @@ fun AnimatedEntryDialog(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnimatedEntryExitDialog(
     onDismissRequest: () -> Unit,
@@ -151,7 +152,7 @@ fun AnimatedScaleInTransition(
 }
 
 @Composable
-fun AnimatedScaleInTransitionForFab(
+fun AnimatedScaleInTransition(
     visible: Boolean,
     animateDurationEnter: Long,
     animateDurationExit: Long,

@@ -11,13 +11,13 @@ import com.example.gatherersmap.data.network.dto.toItemSpot
 import com.example.gatherersmap.data.network.dto.toListItemSpots
 import com.example.gatherersmap.data.network.mapper.compareSpots
 import com.example.gatherersmap.domain.model.ItemSpot
-import com.example.gatherersmap.navigation.NavigationDestinations
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.snackbar.SnackbarNetworkError
 import com.example.gatherersmap.utils.NetworkResult
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -39,21 +39,24 @@ class MapViewModel @Inject constructor(
     private val _temporalMarker = MutableStateFlow<LatLng?>(null)
     val temporalMarker = _temporalMarker.asStateFlow()
 
-    private val _navigationDestination =
-        MutableStateFlow<NavigationDestinations>(NavigationDestinations.Current)
-    val navigationDestination = _navigationDestination.asStateFlow()
-
     private val _networkErrorFlow = MutableSharedFlow<SnackbarNetworkError>()
     val networkErrorFlow = _networkErrorFlow.asSharedFlow()
+
+    private val _splashVisible = MutableStateFlow(true)
+    val splashVisible = _splashVisible.asStateFlow()
 
     var getAllNetworkProgress by mutableStateOf(false)
     var deleteNetworkProgress by mutableStateOf(false)
     var insertAndUpdateNetworkProgress by mutableStateOf(false)
 
+    var fabLocationVisibility by mutableStateOf(false)
+
     init {
         Log.d(TAG, "INIT wm: ")
         viewModelScope.launch(Dispatchers.IO) {
             getAllItemSpots()
+            delay(2000)
+            _splashVisible.value = false
         }
     }
 
@@ -64,22 +67,11 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    fun setNavigationDestination(navDest: NavigationDestinations) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (_navigationDestination.value is NavigationDestinations.Add && navDest is NavigationDestinations.Details) {
-                removeTemporalMarker()
-            }// TODO: can be better?
-            _navigationDestination.update {
-                navDest
-            }
-        }
-    }
-
     private suspend fun getAllItemSpots() {
+        withContext(Dispatchers.Main) {
+            getAllNetworkProgress = true
+        }
         withContext(Dispatchers.IO) {
-            withContext(Dispatchers.Main) {
-                getAllNetworkProgress = true
-            }
             repository.getAllItemSpotsRemote()
                 .collectLatest { result ->
                     when (result) {
@@ -125,13 +117,6 @@ class MapViewModel @Inject constructor(
                     val newItemId = result.data.itemId
                     if (newItemId != null) {
                         getItemAndUpdateList(newItemId)
-                        //getAllItemSpots()
-                        val newItem = _itemsState.value.itemSpots.find {
-                            it.id == newItemId
-                        }
-                        _navigationDestination.update {
-                            NavigationDestinations.Details(newItem ?: itemSpot)
-                        }
                         removeTemporalMarker()
                     }
                 }
@@ -149,19 +134,18 @@ class MapViewModel @Inject constructor(
                     setErrorMessage(
                         error = result.errorMessage,
                         action = {
-                            viewModelScope.launch {
-                                deleteItemSpot(itemSpotId)
-                            }
+                            viewModelScope.launch { deleteItemSpot(itemSpotId) }
                         }
                     )
                 }
 
                 is NetworkResult.Success -> {
                     val isSuccess = result.data.isSuccess
-                    _navigationDestination.update {
-                        NavigationDestinations.Map
+                    _itemsState.update { state ->
+                        state.copy(
+                            itemSpots = state.itemSpots.filter { it.id != itemSpotId }
+                        )
                     }
-                    getAllItemSpots()
                 }
             }
         } finally {
@@ -188,15 +172,6 @@ class MapViewModel @Inject constructor(
 
                     is NetworkResult.Success -> {
                         getItemAndUpdateList(oldSpot.id)
-                        itemsState.value.itemSpots.find {
-                            (it.id == oldSpot.id)
-                        }.also {
-                            it?.let { spot ->
-                                _navigationDestination.update {
-                                    NavigationDestinations.Details(spot)
-                                }
-                            }
-                        }
                     }
                 }
             } finally {
@@ -221,28 +196,16 @@ class MapViewModel @Inject constructor(
 
                 is NetworkResult.Success -> {
                     val item = result.data.mushroom?.toItemSpot()
-                    if (item != null) {
-                        val oldList = itemsState.value.itemSpots.toMutableList()
-                        val existItem = oldList.find {
-                            it.id == item.id
-                        }
-                        if (existItem == null) {
-                            oldList.add(item)
-                            _itemsState.update { MapState(oldList) }
-                        } else {
-                            val newList = oldList.map { oldItem ->
-                                if (oldItem.id == existItem.id) {
-                                    val updItem = oldItem.copy(
-                                        name = item.name,
-                                        description = item.description,
-                                        image = item.image
-                                    )
-                                    updItem
-                                } else {
-                                    oldItem
-                                }
+                    item?.let {
+                        _itemsState.update { state ->
+                            val updatedList = state.itemSpots.toMutableList()
+                            val existingItemIndex = updatedList.indexOfFirst { it.id == item.id }
+                            if (existingItemIndex != -1) {
+                                updatedList[existingItemIndex] = item
+                            } else {
+                                updatedList.add(item)
                             }
-                            _itemsState.update { MapState(newList) }
+                            MapState(updatedList)
                         }
                     }
                 }
@@ -250,17 +213,16 @@ class MapViewModel @Inject constructor(
         }
     }
 
+    fun setFabVisibility(isItGoogleMapRoute: Boolean) {
+        fabLocationVisibility = isItGoogleMapRoute
+    }
+
     fun setTemporalMarker(latLng: LatLng) {
-        _temporalMarker.update {
-            latLng
-        }
+        _temporalMarker.update { latLng }
     }
 
     fun removeTemporalMarker() {
-        _temporalMarker.update {
-            null
-        }
-        // navigationDestination = NavigationDestinations.Map
+        _temporalMarker.update { null }
     }
 
 }
