@@ -4,6 +4,7 @@
 
 package com.example.gatherersmap.presentation.main.ui.bottomsheet
 
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
@@ -21,6 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.gatherersmap.navigation.AppNavGraph
 import com.example.gatherersmap.navigation.ScreenState
 import com.example.gatherersmap.navigation.rememberNavigationState
+import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.map.MapScreen
 import com.example.gatherersmap.presentation.main.ui.snackbar.SnackBarNetworkErrorManager
 import com.example.gatherersmap.presentation.main.vm.MapViewModel
@@ -28,9 +30,11 @@ import com.google.accompanist.navigation.material.ExperimentalMaterialNavigation
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.maps.android.compose.MapsComposeExperimentalApi
 import kotlinx.coroutines.launch
 
 
+@MapsComposeExperimentalApi
 @OptIn(ExperimentalMaterialNavigationApi::class)
 @ExperimentalPermissionsApi
 @Composable
@@ -49,6 +53,7 @@ fun MainScreen(viewModel: MapViewModel = hiltViewModel()) {
         snackbarHost = { SnackbarHost(snackbarHostState) }
     )
     {
+        Log.d(TAG, "MainScreen: started")
         ModalBottomSheetLayout(
             modifier = Modifier.padding(it),
             bottomSheetNavigator = bottomSheetNavigator,

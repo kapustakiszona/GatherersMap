@@ -44,6 +44,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@MapsComposeExperimentalApi
 @Composable
 fun MapScreen(
     onMapClick: () -> Unit,
@@ -58,6 +59,7 @@ fun MapScreen(
     val tempMarkerFlow by viewModel.temporalMarker.collectAsState()
     val oldMarkersList: MutableList<Marker>? = null
     val cameraPositionState = rememberCameraPositionState()
+
     var uiSettings by remember { mutableStateOf(MapUiSettings(zoomControlsEnabled = false)) }
     var properties by remember { mutableStateOf(MapProperties()) }
     var isMapReady by remember { mutableStateOf(false) }
@@ -85,11 +87,41 @@ fun MapScreen(
                 isMapReady = true
             }
         ) {
+            var zoom by remember {
+                mutableFloatStateOf(0f)
+            }
             if (isMapReady) {
                 PermissionHandling(isAllGranted = { result ->
                     uiSettings = uiSettings.copy(myLocationButtonEnabled = false)
                     properties = properties.copy(isMyLocationEnabled = result)
                 })
+                Clustering(
+                    items = itemsState.itemSpots,
+                    onClusterClick = { cluster ->
+                        if (cameraPositionState.position.zoom < zoom) zoom =
+                            cameraPositionState.position.zoom
+                        zoom += 3f
+                        cameraUpdate(
+                            scope = scope, camPosState = cameraPositionState,
+                            position = cluster.position,
+                            zoom = zoom
+                        )
+                        false
+                    },
+                    onClusterItemClick = { itemSpot ->
+                        cameraUpdate( //move camera to screen center
+                            scope = scope,
+                            camPosState = cameraPositionState,
+                            position = itemSpot.position,
+                            zoom = cameraPositionState.position.zoom
+                        )
+                        onMarkerClick(itemSpot)
+                        false
+                    },
+                    clusterItemContent = {
+                        CustomMarker()
+                    },
+                )
             }
             oldMarkersList?.forEach { oldMarker ->
                 oldMarker.remove()
@@ -104,56 +136,24 @@ fun MapScreen(
                     oldMarkersList.orEmpty().toMutableList().add(marker)
                 }
             }
-            var zoom by remember {
-                mutableFloatStateOf(0f)
-            }
-            Clustering(
-                items = itemsState.itemSpots,
-                onClusterClick = { cluster ->
-                    if (cameraPositionState.position.zoom < zoom) zoom =
-                        cameraPositionState.position.zoom
-                    zoom += 3f
+        }
+        AddNewItemFab(
+            modifier = Modifier.padding(20.dp),
+            visibility = viewModel.fabLocationVisibility,
+            loadingState = viewModel.getAllNetworkProgress,
+            onClick = {
+                locationService(context) { currentLocation ->
+                    val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
+                    pickCurrentLocation(latLng)
                     cameraUpdate(
-                        scope = scope, camPosState = cameraPositionState,
-                        position = cluster.position,
-                        zoom = zoom
-                    )
-                    false
-                },
-                onClusterItemClick = { itemSpot ->
-                    cameraUpdate( //move camera to screen center
                         scope = scope,
                         camPosState = cameraPositionState,
-                        position = itemSpot.position,
-                        zoom = cameraPositionState.position.zoom
+                        position = latLng,
+                        zoom = 15f
                     )
-                    onMarkerClick(itemSpot)
-                    false
-                },
-                clusterItemContent = {
-                    CustomMarker()
-                },
-            )
-        }
-        if (isMapReady)
-        // TODO: add splash-screen and change that
-            AddNewItemFab(
-                modifier = Modifier.padding(20.dp),
-                visibility = viewModel.fabLocationVisibility,
-                loadingState = viewModel.getAllNetworkProgress,
-                onClick = {
-                    locationService(context) { currentLocation ->
-                        val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
-                        pickCurrentLocation(latLng)
-                        cameraUpdate(
-                            scope = scope,
-                            camPosState = cameraPositionState,
-                            position = latLng,
-                            zoom = 15f
-                        )
-                    }
                 }
-            )
+            }
+        )
     }
 }
 

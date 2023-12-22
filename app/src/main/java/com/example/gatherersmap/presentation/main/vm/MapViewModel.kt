@@ -17,6 +17,7 @@ import com.example.gatherersmap.utils.NetworkResult
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -41,6 +42,9 @@ class MapViewModel @Inject constructor(
     private val _networkErrorFlow = MutableSharedFlow<SnackbarNetworkError>()
     val networkErrorFlow = _networkErrorFlow.asSharedFlow()
 
+    private val _splashVisible = MutableStateFlow(true)
+    val splashVisible = _splashVisible.asStateFlow()
+
     var getAllNetworkProgress by mutableStateOf(false)
     var deleteNetworkProgress by mutableStateOf(false)
     var insertAndUpdateNetworkProgress by mutableStateOf(false)
@@ -51,6 +55,8 @@ class MapViewModel @Inject constructor(
         Log.d(TAG, "INIT wm: ")
         viewModelScope.launch(Dispatchers.IO) {
             getAllItemSpots()
+            delay(2000)
+            _splashVisible.value = false
         }
     }
 
