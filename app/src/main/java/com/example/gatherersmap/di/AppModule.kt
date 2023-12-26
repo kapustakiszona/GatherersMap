@@ -1,8 +1,11 @@
 package com.example.gatherersmap.di
 
 import android.app.Application
+import android.content.Context
 import androidx.room.Room
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
+import com.example.gatherersmap.data.datastore.DataStoreRepository
+import com.example.gatherersmap.data.datastore.DataStoreRepositoryImpl
 import com.example.gatherersmap.data.localdb.ItemSpotDatabase
 import com.example.gatherersmap.data.network.MushroomApi
 import com.example.gatherersmap.data.network.MushroomService
@@ -11,6 +14,7 @@ import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -46,9 +50,6 @@ object AppModule {
             .build()
     }
 
-// TODO:   provideKotlinSerialization(): Converter.Factory
-
-
     @Singleton
     @Provides
     fun provideRetrofit(BASE_URL: String, okHttpClient: OkHttpClient): Retrofit {
@@ -77,4 +78,16 @@ object AppModule {
     @Provides
     fun provideItemSpotRepository(db: ItemSpotDatabase, apiService: MushroomApi) =
         ItemSpotRepositoryImpl(localDataSource = db, remoteDataSource = apiService)
+
+    @Provides
+    fun provideContext(
+        @ApplicationContext context: Context,
+    ): Context {
+        return context
+    }
+
+    @Singleton
+    @Provides
+    fun provideDataStoreRepository(@ApplicationContext app: Context): DataStoreRepository =
+        DataStoreRepositoryImpl(app)
 }

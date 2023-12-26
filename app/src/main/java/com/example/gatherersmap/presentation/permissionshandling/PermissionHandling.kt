@@ -3,6 +3,7 @@
 package com.example.gatherersmap.presentation.permissionshandling
 
 import android.Manifest
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -15,22 +16,28 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.gatherersmap.R
-import com.example.gatherersmap.data.datastore.DataStoreClient
 import com.example.gatherersmap.presentation.components.reusables.AnimatedEntryDialog
+import com.example.gatherersmap.presentation.main.vm.MapViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 @Composable
 fun PermissionHandling(
     isAllGranted: (Boolean) -> Unit = {},
+    viewModel: MapViewModel = hiltViewModel()
 ) {
     val permissionState =
         rememberMultiplePermissionsState(
@@ -39,36 +46,39 @@ fun PermissionHandling(
                 Manifest.permission.ACCESS_FINE_LOCATION
             )
         )
-    val dataStoreManager = DataStoreClient.getDataStore()
-    val hasInitialRequest =
-        dataStoreManager.getPermissionRequestStatus()
-            .collectAsState(true)
+    val hasInitialRequest = viewModel.getPermissionRequestStatus()
+    var showDialog by rememberSaveable { mutableStateOf(true) }
 
-    if (permissionState.allPermissionsGranted) {
-        isAllGranted(true)
-    } else {
-        if (!permissionState.shouldShowRationale) {
-            when {
-                !hasInitialRequest.value -> {
-                    LaunchedEffect(key1 = true) {
-                        permissionState.launchMultiplePermissionRequest()
-                    }
-                }
+    when {
+        permissionState.allPermissionsGranted -> isAllGranted(true)
 
-                hasInitialRequest.value -> {
-                    //Call if permissions are disabled and rationale was showed
-                }
-            }
-        } else {
+        !permissionState.shouldShowRationale && !hasInitialRequest -> {
             LaunchedEffect(key1 = true) {
-                dataStoreManager.savePermissionRequestStatus(
-                    hasInitialRequest = true
-                )
-            }
-            AnimatedRationaleDialog(buttonAction = {
                 permissionState.launchMultiplePermissionRequest()
-            },
-                onDismissRequest = {})
+            }
+        }
+
+        hasInitialRequest -> {
+            // TODO: add intent to settings
+            Toast.makeText(
+                LocalContext.current, "Give permission in app settings",
+                Toast.LENGTH_LONG
+            )
+                .show()
+        }
+
+        else -> {
+            LaunchedEffect(key1 = true) {
+                viewModel.savePermissionRequestStatus(hasInitialRequest = true)
+            }
+            if (showDialog) {
+                AnimatedRationaleDialog(
+                    buttonAction = {
+                        permissionState.launchMultiplePermissionRequest()
+                        showDialog = !showDialog
+                    },
+                    onDismissRequest = {})
+            }
         }
     }
 }

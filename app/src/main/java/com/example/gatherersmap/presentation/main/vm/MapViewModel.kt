@@ -7,6 +7,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gatherersmap.data.ItemSpotRepositoryImpl
+import com.example.gatherersmap.data.datastore.DataStoreRepositoryImpl
+import com.example.gatherersmap.data.datastore.DataStoreRepositoryImpl.PreferencesKeys.CAMERA_POSITION_LATITUDE
+import com.example.gatherersmap.data.datastore.DataStoreRepositoryImpl.PreferencesKeys.CAMERA_POSITION_LONGITUDE
+import com.example.gatherersmap.data.datastore.DataStoreRepositoryImpl.PreferencesKeys.CAMERA_POSITION_ZOOM
+import com.example.gatherersmap.data.datastore.DataStoreRepositoryImpl.PreferencesKeys.PERMISSION_REQUEST_STATUS
 import com.example.gatherersmap.data.network.dto.toItemSpot
 import com.example.gatherersmap.data.network.dto.toListItemSpots
 import com.example.gatherersmap.data.network.mapper.compareSpots
@@ -14,6 +19,7 @@ import com.example.gatherersmap.domain.model.ItemSpot
 import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.example.gatherersmap.presentation.main.ui.snackbar.SnackbarNetworkError
 import com.example.gatherersmap.utils.NetworkResult
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,12 +31,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val repository: ItemSpotRepositoryImpl,
+    private val dataStoreRepository: DataStoreRepositoryImpl
 ) : ViewModel() {
 
     private val _itemsState = MutableStateFlow(MapState())
@@ -42,8 +50,8 @@ class MapViewModel @Inject constructor(
     private val _networkErrorFlow = MutableSharedFlow<SnackbarNetworkError>()
     val networkErrorFlow = _networkErrorFlow.asSharedFlow()
 
-    private val _splashVisible = MutableStateFlow(true)
-    val splashVisible = _splashVisible.asStateFlow()
+    private val _splashVisibility = MutableStateFlow(true)
+    val splashVisibility = _splashVisibility.asStateFlow()
 
     var getAllNetworkProgress by mutableStateOf(false)
     var deleteNetworkProgress by mutableStateOf(false)
@@ -56,14 +64,7 @@ class MapViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             getAllItemSpots()
             delay(2000)
-            _splashVisible.value = false
-        }
-    }
-
-    private fun setErrorMessage(error: String, action: () -> Unit) {
-        viewModelScope.launch {
-            val errorData = SnackbarNetworkError(error, action)
-            _networkErrorFlow.emit(errorData)
+            _splashVisibility.value = false
         }
     }
 
@@ -210,6 +211,53 @@ class MapViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun savePermissionRequestStatus(hasInitialRequest: Boolean) {
+        viewModelScope.launch {
+            dataStoreRepository.putBoolean(
+                key = PERMISSION_REQUEST_STATUS,
+                value = hasInitialRequest
+            )
+        }
+    }
+
+    fun getPermissionRequestStatus(): Boolean = runBlocking {
+        dataStoreRepository.getBoolean(PERMISSION_REQUEST_STATUS) ?: false
+    }
+
+    fun saveCameraPosition(cameraPosition: CameraPosition) {
+        viewModelScope.launch {
+            dataStoreRepository.putDouble(
+                key = CAMERA_POSITION_LATITUDE,
+                value = cameraPosition.target.latitude
+            )
+            dataStoreRepository.putDouble(
+                key = CAMERA_POSITION_LONGITUDE,
+                value = cameraPosition.target.longitude
+            )
+            dataStoreRepository.putFloat(
+                key = CAMERA_POSITION_ZOOM,
+                value = cameraPosition.zoom
+            )
+        }
+    }
+
+    fun getCameraPosition(): CameraPosition = runBlocking {
+        CameraPosition.fromLatLngZoom(
+            LatLng(
+                dataStoreRepository.getDouble(CAMERA_POSITION_LATITUDE) ?: 1.1,
+                dataStoreRepository.getDouble(CAMERA_POSITION_LONGITUDE) ?: 2.1
+            ),
+            dataStoreRepository.getFloat(CAMERA_POSITION_ZOOM) ?: 0f
+        )
+    }
+
+    private fun setErrorMessage(error: String, action: () -> Unit) {
+        viewModelScope.launch {
+            val errorData = SnackbarNetworkError(error, action)
+            _networkErrorFlow.emit(errorData)
         }
     }
 
