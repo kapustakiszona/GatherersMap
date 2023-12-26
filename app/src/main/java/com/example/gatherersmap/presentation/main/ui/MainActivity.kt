@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen().setKeepOnScreenCondition { viewModel.splashVisible.value }
+        installSplashScreen().setKeepOnScreenCondition { viewModel.splashVisibility.value }
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
