@@ -7,7 +7,6 @@ import android.content.Context.LOCATION_SERVICE
 import android.location.LocationManager
 import android.location.LocationManager.GPS_PROVIDER
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -90,11 +89,9 @@ fun MapScreen(
             uiSettings = uiSettings,
             cameraPositionState = cameraPositionState,
             onMapLongClick = { latLng ->
-                cameraUpdate(
+                cameraPositionState.setCameraPosition(
                     scope = scope,
-                    camPosState = cameraPositionState,
-                    position = latLng,
-                    zoom = cameraPositionState.position.zoom
+                    position = latLng
                 )
                 onAddMarkerLongClick(latLng)
             },
@@ -117,23 +114,21 @@ fun MapScreen(
                 Clustering(
                     items = itemsState.itemSpots,
                     onClusterClick = { cluster ->
-                        if (cameraPositionState.position.zoom < zoom) zoom =
-                            cameraPositionState.position.zoom
+                        if (cameraPositionState.position.zoom < zoom)
+                            zoom = cameraPositionState.position.zoom
                         zoom += 3f
-                        cameraUpdate(
-                            scope = scope, camPosState = cameraPositionState,
+                        cameraPositionState.setCameraPosition(
+                            scope = scope,
                             position = cluster.position,
                             zoom = zoom
                         )
                         false
                     },
                     onClusterItemClick = { itemSpot ->
-                        cameraUpdate( //move camera to screen center
+                        cameraPositionState.setCameraPosition(
                             scope = scope,
-                            camPosState = cameraPositionState,
                             position = itemSpot.position,
-                            zoom = cameraPositionState.position.zoom
-                        )
+                        ) //move camera to screen center
                         onMarkerClick(itemSpot)
                         false
                     },
@@ -161,14 +156,11 @@ fun MapScreen(
             visibility = viewModel.fabLocationVisibility,
             loadingState = viewModel.getAllNetworkProgress,
             onClick = {
-                Toast.makeText(context, "${viewModel.getCameraPosition()}", Toast.LENGTH_LONG)
-                    .show()
                 locationService(context) { currentLocation ->
                     val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
                     pickCurrentLocation(latLng)
-                    cameraUpdate(
+                    cameraPositionState.setCameraPosition(
                         scope = scope,
-                        camPosState = cameraPositionState,
                         position = latLng,
                         zoom = 15f
                     )
@@ -178,15 +170,14 @@ fun MapScreen(
     }
 }
 
-private fun cameraUpdate(
+private fun CameraPositionState.setCameraPosition(
     scope: CoroutineScope,
-    camPosState: CameraPositionState,
-    position: LatLng,
+    position: LatLng = this.position.target,
     duration: Int = 1000,
-    zoom: Float
+    zoom: Float = this.position.zoom
 ) {
     scope.launch {
-        camPosState.animate(
+        animate(
             update = CameraUpdateFactory.newCameraPosition(
                 CameraPosition.fromLatLngZoom(
                     position,
@@ -215,7 +206,6 @@ private fun SaveCameraPositionState(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
-                Log.d(TAG, "SaveCameraPositionState: state was saved")
                 saveCameraState()
             }
         }
