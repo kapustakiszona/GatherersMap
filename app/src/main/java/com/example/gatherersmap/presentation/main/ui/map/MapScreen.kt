@@ -1,4 +1,4 @@
-@file:OptIn(MapsComposeExperimentalApi::class, MapsComposeExperimentalApi::class)
+@file:OptIn(MapsComposeExperimentalApi::class)
 
 package com.example.gatherersmap.presentation.main.ui.map
 
@@ -54,20 +54,6 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-fun CameraPositionState.cameraPositionInitializer(
-    context: Context,
-    cameraPosition: CameraPosition
-) {
-    val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
-    val statusGPS = locationManager.isProviderEnabled(GPS_PROVIDER)
-    if (statusGPS) {
-        locationService(context) {
-            position = CameraPosition.fromLatLngZoom(LatLng(it.latitude, it.longitude), 15f)
-        }
-    } else {
-        position = cameraPosition
-    }
-}
 
 @MapsComposeExperimentalApi
 @Composable
@@ -85,7 +71,6 @@ fun MapScreen(
     val oldMarkersList: MutableList<Marker>? = null
     val cameraPositionSavedState = viewModel.getCameraPosition()
     val cameraPositionState = rememberCameraPositionState {
-        Log.d(TAG, "camera Initializer")
         cameraPositionInitializer(context = context, cameraPosition = cameraPositionSavedState)
     }
 
@@ -238,5 +223,20 @@ private fun SaveCameraPositionState(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
+    }
+}
+
+private fun CameraPositionState.cameraPositionInitializer(
+    context: Context,
+    cameraPosition: CameraPosition
+) {
+    val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
+    val statusGPS = locationManager.isProviderEnabled(GPS_PROVIDER)
+    if (statusGPS) {
+        locationService(context) {
+            position = CameraPosition.fromLatLngZoom(LatLng(it.latitude, it.longitude), 15f)
+        }
+    } else {
+        position = cameraPosition
     }
 }
