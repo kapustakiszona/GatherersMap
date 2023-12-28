@@ -10,4 +10,7 @@
     <string name="permission_dialog_title">Permission Request</string>
     <string name="permission_dialog_description">To track your location on the map and use the full functionality, you must give permission</string>
     <string name="permissions_dialog_button">Give Permissions</string>
+    <string name="startActivity_dialog_title">Permission required</string>
+    <string name="startActivity_dialog_desription">To use the application correctly, give permission to determine location in the settings.</string>
+    <string name="startActivity_dialog_button_text">Go to settings</string>
 </resources>

@@ -8,7 +8,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 
 sealed class ScreenState(val route: String) {
 
-    object GoogleMap : ScreenState(route = ROUTE_MAIN_MAP)
+    data object GoogleMap : ScreenState(route = ROUTE_MAIN_MAP)
 
     data object BottomSheet : ScreenState(route = ROUTE_BOTT_SHEET_HOME) {
         object Add : ScreenState(route = ROUTE_ADD_ITEM) {

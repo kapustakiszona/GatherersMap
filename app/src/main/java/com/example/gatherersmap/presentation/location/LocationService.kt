@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.IntentSender
 import android.location.Location
 import android.util.Log
-import com.example.gatherersmap.presentation.main.ui.MainActivity
+import com.example.gatherersmap.presentation.main.ui.MainActivity.Companion.TAG
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
@@ -41,16 +41,13 @@ fun locationService(context: Context, currentLocationObserver: (Location) -> Uni
                             1002
                         )
                     } catch (e: IntentSender.SendIntentException) {
-                        Log.i(
-                            MainActivity.TAG,
-                            "Pending Intent unable to execute request."
-                        )
+                        Log.d(TAG, "Pending Intent unable to execute request.")
                     }
                 }
 
                 LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
-                    Log.i(
-                        MainActivity.TAG,
+                    Log.d(
+                        TAG,
                         "Location settings are inadequate, and cannot be fixed here. Dialog not created."
                     )
                 }
