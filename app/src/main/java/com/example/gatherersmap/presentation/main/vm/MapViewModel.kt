@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
@@ -247,8 +248,8 @@ class MapViewModel @Inject constructor(
     fun getCameraPosition(): CameraPosition = runBlocking {
         CameraPosition.fromLatLngZoom(
             LatLng(
-                dataStoreRepository.getDouble(CAMERA_POSITION_LATITUDE) ?: 1.1,
-                dataStoreRepository.getDouble(CAMERA_POSITION_LONGITUDE) ?: 2.1
+                dataStoreRepository.getDouble(CAMERA_POSITION_LATITUDE) ?: Random.nextDouble(),
+                dataStoreRepository.getDouble(CAMERA_POSITION_LONGITUDE) ?: Random.nextDouble()
             ),
             dataStoreRepository.getFloat(CAMERA_POSITION_ZOOM) ?: 0f
         )
