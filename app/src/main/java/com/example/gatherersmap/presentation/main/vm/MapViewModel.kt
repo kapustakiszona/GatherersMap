@@ -228,7 +228,7 @@ class MapViewModel @Inject constructor(
     }
 
     fun saveCameraPosition(cameraPosition: CameraPosition) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             dataStoreRepository.putDouble(
                 key = CAMERA_POSITION_LATITUDE,
                 value = cameraPosition.target.latitude

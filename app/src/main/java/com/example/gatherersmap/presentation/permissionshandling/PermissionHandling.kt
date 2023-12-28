@@ -1,9 +1,10 @@
-@file:OptIn(ExperimentalPermissionsApi::class, ExperimentalPermissionsApi::class)
+@file:OptIn(ExperimentalPermissionsApi::class)
 
 package com.example.gatherersmap.presentation.permissionshandling
 
 import android.Manifest
-import android.widget.Toast
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +48,7 @@ fun PermissionHandling(
                 Manifest.permission.ACCESS_FINE_LOCATION
             )
         )
+    val context = LocalContext.current
     val hasInitialRequest = viewModel.getPermissionRequestStatus()
     var showDialog by rememberSaveable { mutableStateOf(true) }
 
@@ -58,13 +61,19 @@ fun PermissionHandling(
             }
         }
 
-        hasInitialRequest -> {
-            // TODO: add intent to settings
-            Toast.makeText(
-                LocalContext.current, "Give permission in app settings",
-                Toast.LENGTH_LONG
-            )
-                .show()
+        !permissionState.shouldShowRationale && hasInitialRequest -> {
+            var startActivity by remember { mutableStateOf(false) }
+            AnimatedDialog(
+                title = stringResource(R.string.startActivity_dialog_title),
+                description = stringResource(R.string.startActivity_dialog_desription),
+                buttonText = stringResource(R.string.startActivity_dialog_button_text),
+                buttonAction = { startActivity = !startActivity },
+                onDismissRequest = {})
+            LaunchedEffect(key1 = startActivity) {
+                if (startActivity) {
+                    context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
+            }
         }
 
         else -> {
@@ -72,7 +81,10 @@ fun PermissionHandling(
                 viewModel.savePermissionRequestStatus(hasInitialRequest = true)
             }
             if (showDialog) {
-                AnimatedRationaleDialog(
+                AnimatedDialog(
+                    title = stringResource(R.string.permission_dialog_title),
+                    description = stringResource(R.string.permission_dialog_description),
+                    buttonText = stringResource(R.string.permissions_dialog_button),
                     buttonAction = {
                         permissionState.launchMultiplePermissionRequest()
                         showDialog = !showDialog
@@ -84,7 +96,10 @@ fun PermissionHandling(
 }
 
 @Composable
-fun AnimatedRationaleDialog(
+fun AnimatedDialog(
+    title: String,
+    description: String,
+    buttonText: String,
     buttonAction: () -> Unit,
     onDismissRequest: () -> Unit,
 ) {
@@ -100,7 +115,7 @@ fun AnimatedRationaleDialog(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.permission_dialog_title),
+                    text = title,
                     color = AlertDialogDefaults.titleContentColor,
                     style = TextStyle(
                         fontSize = MaterialTheme.typography.labelLarge.fontSize,
@@ -108,7 +123,7 @@ fun AnimatedRationaleDialog(
                     )
                 )
                 Text(
-                    text = stringResource(R.string.permission_dialog_description),
+                    text = description,
                     color = AlertDialogDefaults.textContentColor
                 )
                 OutlinedButton(
@@ -119,7 +134,7 @@ fun AnimatedRationaleDialog(
                     shape = MaterialTheme.shapes.small.copy(CornerSize(20.dp))
                 ) {
                     Text(
-                        text = stringResource(R.string.permissions_dialog_button),
+                        text = buttonText,
                         style = TextStyle(
                             fontSize = MaterialTheme.typography.labelMedium.fontSize,
                             shadow = MaterialTheme.typography.labelMedium.shadow,

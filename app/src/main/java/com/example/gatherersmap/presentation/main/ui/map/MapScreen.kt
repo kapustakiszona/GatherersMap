@@ -1,13 +1,19 @@
-@file:OptIn(MapsComposeExperimentalApi::class, MapsComposeExperimentalApi::class)
+@file:OptIn(MapsComposeExperimentalApi::class)
 
 package com.example.gatherersmap.presentation.main.ui.map
 
+import android.content.Context
+import android.content.Context.LOCATION_SERVICE
+import android.location.LocationManager
+import android.location.LocationManager.GPS_PROVIDER
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -18,7 +24,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import coil.compose.AsyncImage
 import com.example.gatherersmap.R
 import com.example.gatherersmap.domain.model.ItemSpot
@@ -44,6 +54,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+
 @MapsComposeExperimentalApi
 @Composable
 fun MapScreen(
@@ -58,12 +69,20 @@ fun MapScreen(
     val itemsState by viewModel.itemsState.collectAsState()
     val tempMarkerFlow by viewModel.temporalMarker.collectAsState()
     val oldMarkersList: MutableList<Marker>? = null
-    val cameraPositionState = rememberCameraPositionState()
+    val cameraPositionSavedState = viewModel.getCameraPosition()
+    val cameraPositionState = rememberCameraPositionState {
+        cameraPositionInitializer(context = context, cameraPosition = cameraPositionSavedState)
+    }
 
     var uiSettings by remember { mutableStateOf(MapUiSettings(zoomControlsEnabled = false)) }
     var properties by remember { mutableStateOf(MapProperties()) }
     var isMapReady by remember { mutableStateOf(false) }
 
+    SaveCameraPositionState(
+        saveCameraState = {
+            viewModel.saveCameraPosition(cameraPositionState.position)
+        }
+    )
     Box(contentAlignment = Alignment.BottomCenter) {
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
@@ -142,6 +161,8 @@ fun MapScreen(
             visibility = viewModel.fabLocationVisibility,
             loadingState = viewModel.getAllNetworkProgress,
             onClick = {
+                Toast.makeText(context, "${viewModel.getCameraPosition()}", Toast.LENGTH_LONG)
+                    .show()
                 locationService(context) { currentLocation ->
                     val latLng = LatLng(currentLocation.latitude, currentLocation.longitude)
                     pickCurrentLocation(latLng)
@@ -184,4 +205,38 @@ private fun CustomMarker() {
         contentDescription = null,
         modifier = Modifier.size(40.dp),
     )
+}
+
+@Composable
+private fun SaveCameraPositionState(
+    saveCameraState: () -> Unit
+) {
+    val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                Log.d(TAG, "SaveCameraPositionState: state was saved")
+                saveCameraState()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+}
+
+private fun CameraPositionState.cameraPositionInitializer(
+    context: Context,
+    cameraPosition: CameraPosition
+) {
+    val locationManager = context.getSystemService(LOCATION_SERVICE) as LocationManager
+    val statusGPS = locationManager.isProviderEnabled(GPS_PROVIDER)
+    if (statusGPS) {
+        locationService(context) {
+            position = CameraPosition.fromLatLngZoom(LatLng(it.latitude, it.longitude), 15f)
+        }
+    } else {
+        position = cameraPosition
+    }
 }
